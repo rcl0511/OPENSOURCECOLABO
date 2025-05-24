@@ -1,0 +1,84 @@
+.voice-bg {
+  min-height: 100vh;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+.voice-header {
+  margin-top: 20px;
+  color: #2C6EFF;
+  font-size: 17px;
+  font-weight: 600;
+  text-align: center;
+}
+.voice-mic {
+  margin-top: 35px;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+.voice-guide {
+  margin-top: 32px;
+  color: #000;
+  text-align: center;
+  font-size: 17px;
+  font-family: 'Poppins', 'Helvetica', Arial, sans-serif;
+}
+.voice-btn-group {
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  width: 80%;
+}
+.voice-btn {
+  padding: 13px 0;
+  font-size: 18px;
+  font-weight: 600;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  margin-bottom: 3px;
+}
+.voice-btn.main {
+  background: #2C6EFF;
+  color: #fff;
+}
+.voice-btn.outline {
+  background: #fff;
+  color: #2C6EFF;
+  border: 2px solid #2C6EFF;
+}
+.voice-result {
+  margin-top: 26px;
+  color: #2C6EFF;
+  font-size: 18px;
+  font-weight: 600;
+}
+.voice-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100vw;
+  height: 60px;
+  background: #2C6EFF;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+.nav-item {
+  color: #fff;
+  font-size: 16px;
+  font-family: 'Poppins', 'Helvetica', Arial, sans-serif;
+  padding: 2px 6px;
+  opacity: 0.8;
+}
+.nav-item.active {
+  font-weight: bold;
+  border-top: 3px solid #fff;
+  opacity: 1;
+}
