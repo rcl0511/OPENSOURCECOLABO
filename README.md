@@ -15,11 +15,12 @@ TTS(Text to Speech)로 음성 안내를 제공하는 Python 기반 프로그램�
 
 예를 들어 사용자가 쓰러졌어요 라고 말하면 의식이 있나요 등의 후속 질문과 안내를 단계별로 제공합니다
 
-기술 스택
-Python 3
-gTTS 또는 네이버 Clova 등 TTS API
-음성 인식용 Speech to Text API
-필요한 라이브러리는 requirements.txt에 정리되어 있습니다
+-Key Features
+  - Voice recognition (speech-to-text)
+  - Automated situation detection (keywords)
+  - Customized AI-guided response for emergency scenarios (ex: CPR, seizure, choking)
+  - Real-time TTS audio generation (Korean)
+  - Web-based user interface (React)
 
 실행 방법
 
