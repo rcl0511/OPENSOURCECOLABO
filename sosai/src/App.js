@@ -4,6 +4,8 @@ import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import VoicePage from "./pages/VoicePage";
 import CallPage from "./pages/CallPage";
+import Medical from "./pages/Medical";
+import Settings from "./pages/Settings";
 
 function App() {
   return (
@@ -15,6 +17,8 @@ function App() {
         <Route path="/voice" element={<VoicePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/call" element={<CallPage />} />
+        <Route path="/medical" element={<Medical />} />
+        <Route path="/settings" element={<Settings />} />
         {/* 필요시 /medinfo 등 추가 */}
       </Routes>
     </BrowserRouter>
