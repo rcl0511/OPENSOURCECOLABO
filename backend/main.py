@@ -27,12 +27,12 @@ def get_emergency_response(keyword):
     keyword = keyword.strip()
     if keyword == "쓰러졌어요":
         return "지금 환자분이 의식이 있으신가요?"
-    elif keyword == "없어요":
+    elif keyword == ["아니요", "없어요"]:
         return (
             "지금 바로 119에 신고해 주세요. 그리고 심폐소생술을 시작해 주시겠어요?\n"
             "심폐소생술이 필요하시면 '심폐소생술' 또는 'CPR'이라고 말씀해 주세요."
         )
-    elif keyword == "있어요":
+    elif keyword == ["네", "있어요"]:
         return "네, 알겠습니다. 환자분의 호흡과 상태를 계속 지켜봐 주세요. 필요하다면 언제든 다시 말씀해 주세요."
     elif keyword == "발작":
         return "환자분을 조심스럽게 옆으로 눕혀 주시고, 주변에 위험한 물건이 있다면 치워 주세요."
