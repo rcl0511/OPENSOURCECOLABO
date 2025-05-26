@@ -8,9 +8,13 @@ export default function VoicePage() {
   const [response, setResponse] = useState("");   // 서버의 응답 멘트
   const [audioUrl, setAudioUrl] = useState("");   // 서버의 mp3 url
   const audioRef = useRef(null);
+  const [showInputBox, setShowInputBox] = useState(false);
+  const [textInput, setTextInput] = useState("");
+  
 
   const handleStart = () => {
-    console.log("음성인식 버튼 클릭됨");
+    console.log("음성인식 버튼 클릭됨"); 
+
     if (!("webkitSpeechRecognition" in window)) {
       alert("브라우저가 음성인식을 지원하지 않습니다.");
       return;
@@ -20,16 +24,39 @@ export default function VoicePage() {
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
 
+    setResult("");     // 이전 결과 초기화
+    setResponse("");   // 응답도 초기화
+
+    let gotResult = false;  // 인식 여부
+
     recognition.onstart = () => setListening(true);
-    recognition.onend = () => setListening(false);
+    recognition.onend = () => {
+      setListening(false);
+      if (!gotResult) {
+        setResponse("음성을 인식하지 못했어요. 다시 말씀해 주세요.");
+      }
+    };
 
     recognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript;
+      gotResult = true;
       setResult(transcript);
-      sendToServer(transcript); // 서버로 전송
+      sendToServer(transcript);
     };
 
     recognition.start();
+  };
+
+  const handleTextInput = () => {
+    setShowInputBox(true);
+    setTextInput("");  // 초기화
+  };
+
+  const submitTextInput = () => {
+    if (textInput.trim() === "") return;
+    setResult(textInput);
+    sendToServer(textInput);
+    setShowInputBox(false);
   };
 
   // FastAPI 서버에 음성 결과 전송
@@ -38,11 +65,11 @@ export default function VoicePage() {
     try {
       setResponse("AI 응답을 기다리는 중...");
       setAudioUrl("");
-      const res = await fetch("http://192.168.219.119:8000/dialog", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ keyword }),
-});
+      const res = await fetch("http://localhost:8000/dialog", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ keyword }),
+      });
       console.log(">> fetch 응답: ", res);
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
@@ -51,7 +78,7 @@ export default function VoicePage() {
       setResponse(data.text);
       //const mp3url = `http://127.0.0.1:8000/${data.audio_url}`;
       const mp3url = `http://192.168.219.119:8000/${data.audio_url}`;
-// 오디오 태그 src={audioUrl}에 세팅!
+      // 오디오 태그 src={audioUrl}에 세팅!
 
       setAudioUrl(mp3url);
       console.log("audioUrl:", mp3url);
@@ -79,19 +106,39 @@ export default function VoicePage() {
           상황에 맞는 대처방법을 알려드리겠습니다
         </b>
       </div>
-      <div className="voice-btn-group">
+      <div className="voice-btn-row">
         <button
           className="voice-btn main"
           onClick={handleStart}
           disabled={listening}
-          style={{ background: listening ? "#ddd" : "#305078" }}
         >
-          {listening ? "듣는 중..." : "음성인식"}
+          {listening ? "듣는 중..." : "음성으로 요청하기"}
         </button>
-        <button className="voice-btn outline" disabled={listening}>
+        <button
+          className="voice-btn outline"
+          onClick={handleTextInput}
+          disabled={listening}
+        >
           텍스트로 요청하기
         </button>
       </div>
+      {showInputBox && (
+        <div className="text-input-row">
+          <input
+            type="text"
+            value={textInput}
+            onChange={(e) => setTextInput(e.target.value)}
+            placeholder="상황을 입력해 주세요."
+            className="text-input-field"
+          />
+          <button
+            onClick={submitTextInput}
+            className="text-submit-btn"
+          >
+            전송
+          </button>
+        </div>
+      )}
       {result && (
         <div className="voice-result">인식 결과: <b>{result}</b></div>
       )}
