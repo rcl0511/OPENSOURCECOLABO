@@ -7,6 +7,8 @@ export default function VoicePage() {
   const [result, setResult] = useState("");       // 음성 인식 결과
   const [response, setResponse] = useState("");   // 서버의 응답 멘트
   const [audioUrl, setAudioUrl] = useState("");   // 서버의 mp3 url
+  const [showInputBox, setShowInputBox] = useState(false);
+  const [textInput, setTextInput] = useState("");
   const audioRef = useRef(null);
 
   const handleStart = () => {
@@ -20,16 +22,38 @@ export default function VoicePage() {
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
 
+    setResult("");     // 이전 결과 초기화
+    setResponse("");   // 응답도 초기화
+    let gotResult = false;  // 인식 여부
+
     recognition.onstart = () => setListening(true);
-    recognition.onend = () => setListening(false);
+    recognition.onend = () => {
+      setListening(false);
+      if (!gotResult) {
+        setResponse("음성을 인식하지 못했어요. 다시 말씀해 주세요.");
+      }
+    };
 
     recognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript;
+      gotResult = true;
       setResult(transcript);
       sendToServer(transcript); // 서버로 전송
     };
 
     recognition.start();
+  };
+
+  const handleTextInput = () => {
+    setShowInputBox(true);
+    setTextInput("");
+  };
+
+  const submitTextInput = () => {
+    if (textInput.trim() === "") return;
+    setResult(textInput);
+    sendToServer(textInput);
+    setShowInputBox(false);
   };
 
   // FastAPI 서버에 음성 결과 전송
@@ -38,7 +62,7 @@ export default function VoicePage() {
     try {
       setResponse("AI 응답을 기다리는 중...");
       setAudioUrl("");
-      const res = await fetch("http://192.168.219.119:8000/dialog", {
+      const res = await fetch("http://localhost:8000/dialog", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({ keyword }),
@@ -79,19 +103,38 @@ export default function VoicePage() {
           상황에 맞는 대처방법을 알려드리겠습니다
         </b>
       </div>
-      <div className="voice-btn-group">
+      <div className="voice-btn-row">
         <button
           className="voice-btn main"
           onClick={handleStart}
           disabled={listening}
-          style={{ background: listening ? "#ddd" : "#305078" }}
         >
-          {listening ? "듣는 중..." : "음성인식"}
+          {listening ? "듣는 중..." : "음성으로 요청하기"}
         </button>
-        <button className="voice-btn outline" disabled={listening}>
+        <button
+          className="voice-btn outline"
+          onClick={handleTextInput}
+          disabled={listening}
+        >
           텍스트로 요청하기
         </button>
       </div>
+      {showInputBox && (
+        <div className="text-input-row">
+          <input
+            type="text"
+            value={textInput}
+            onChange={(e) => setTextInput(e.target.value)}
+            placeholder="상황을 입력해 주세요."
+            className="text-input-field"
+          />
+          <button
+            onClick={submitTextInput}
+            className="text-submit-btn"
+          >
+            전송
+          </button>
+        </div>
       {result && (
         <div className="voice-result">인식 결과: <b>{result}</b></div>
       )}
