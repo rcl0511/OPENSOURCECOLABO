@@ -135,6 +135,8 @@ export default function VoicePage() {
             전송
           </button>
         </div>
+      )}
+
       {result && (
         <div className="voice-result">인식 결과: <b>{result}</b></div>
       )}
