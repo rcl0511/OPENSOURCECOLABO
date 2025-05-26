@@ -1,14 +1,29 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import NavBar from "../components/NavBar";
 import "./SettingsPage.css";
 
 export default function Settings() {
   const defaultImg = "https://cdn-icons-png.flaticon.com/512/147/147144.png";
+
   const [profileImg, setProfileImg] = useState(() => {
-    // 이미지 로컬스토리지에서 불러오기
     return localStorage.getItem("profileImg") || defaultImg;
   });
+
+  const [name, setName] = useState("이름 없음");
   const fileInput = useRef(null);
+
+  // 이름 로딩
+  useEffect(() => {
+    const saved = localStorage.getItem("myMedical");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed.name) setName(parsed.name);
+      } catch (e) {
+        console.error("이름 불러오기 실패:", e);
+      }
+    }
+  }, []);
 
   const handleImgChange = (e) => {
     const file = e.target.files[0];
@@ -45,12 +60,15 @@ export default function Settings() {
           ref={fileInput}
           onChange={handleImgChange}
         />
-        {/* 이름 */}
+
+        {/* 이름 (연동된 값으로 출력) */}
         <div style={{ fontWeight: 700, color: "#2655b8", fontSize: "1.18rem", marginTop: 10 }}>
-          김눈송
+          {name}
         </div>
+
         <hr style={{ width: "70%", margin: "18px auto 0 auto", borderColor: "#e7e7ef" }} />
       </div>
+
       {/* 설정 버튼 목록 */}
       <div className="settings-list">
         <button className="settings-btn">나에 대해 작성하기</button>
@@ -59,6 +77,7 @@ export default function Settings() {
         <button className="settings-btn">Share this app</button>
         <button className="settings-btn logout">Logout</button>
       </div>
+
       <NavBar active="settings" />
     </div>
   );

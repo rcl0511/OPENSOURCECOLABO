@@ -15,7 +15,7 @@ export default function LoginPage() {
         <div className="login-btn-group">
           <button
             className="login-btn main"
-            onClick={() => navigate("/medinfo")}
+            onClick={() => navigate("/medical")}
           >
             의료 기초사항 작성하기
           </button>

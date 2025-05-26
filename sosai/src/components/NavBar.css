@@ -1,28 +1,40 @@
 .nav-bar {
   position: fixed;
-  bottom: 0; left: 0;
+  bottom: 0;
+  left: 0;
   width: 100vw;
-  height: 64px;
-  background: #2C6EFF;
+  height: 80px;
+  background: #2C6EFF; /* 파란색 배경 */
   display: flex;
   justify-content: space-around;
   align-items: center;
   z-index: 100;
 }
+
 .nav-icon {
   display: flex;
   flex-direction: column;
   align-items: center;
-  color: #dbeafe;
+  justify-content: center;
+  flex: 1;
+  color: #dbeafe; /* 기본 아이콘 색상 (밝은 파랑) */
   font-size: 26px;
-  opacity: 0.8;
   cursor: pointer;
   user-select: none;
+  padding: 10px 0;
+  transition: transform 0.2s ease, color 0.2s ease;
 }
+
 .nav-icon.active {
-  color: #fff;
-  opacity: 1;
+  color: #ffffff;        /* 선택된 탭: 흰색 강조 */
+  transform: scale(1.08); /* 살짝 확대 효과 */
+  font-weight: 600;
 }
+
+.nav-icon:hover {
+  background-color: rgba(255, 255, 255, 0.05); /* 터치 영역 강조 */
+}
+
 .nav-label {
   font-size: 11px;
   margin-top: 3px;

@@ -7,7 +7,9 @@ export default function VoicePage() {
   const [listening, setListening] = useState(false);
   const [result, setResult] = useState("");       // 음성 인식 결과
   const [response, setResponse] = useState("");   // 서버의 응답 멘트
-  const [audioUrl, setAudioUrl] = useState(null); // 오디오 URL, 초기 null로
+  const [audioUrl, setAudioUrl] = useState(null); // 오디오 URL
+  const [showInputBox, setShowInputBox] = useState(false); // 텍스트 입력창 표시 여부
+  const [textInput, setTextInput] = useState(""); // 텍스트 입력값
   const audioRef = useRef(null);
 
   const handleStart = () => {
@@ -33,7 +35,19 @@ export default function VoicePage() {
     recognition.start();
   };
 
-  // FastAPI 서버에 음성 결과 전송
+  const handleTextInputClick = () => {
+    setShowInputBox(true);
+    setTextInput("");
+  };
+
+  const handleTextSubmit = () => {
+    if (textInput.trim() === "") return;
+    setResult(textInput);
+    sendToServer(textInput);
+    setShowInputBox(false);
+  };
+
+  // FastAPI 서버에 음성 결과 or 텍스트 전송
   const sendToServer = async (keyword) => {
     console.log(">> fetch 준비: ", keyword);
     try {
@@ -50,14 +64,15 @@ export default function VoicePage() {
       }
       const data = await res.json();
       setResponse(data.text);
-
-      // 오디오 URL: IP 기준으로 세팅 (audio_url은 'static/xxx.mp3' 형태)
       const mp3url = `http://localhost:8000/${data.audio_url}`;
       setAudioUrl(mp3url);
       console.log("audioUrl:", mp3url);
 
       setTimeout(() => {
-        audioRef.current?.play();
+        if (audioRef.current) {
+          audioRef.current.playbackRate = 1.25; // ✅ 1.25배 속도 설정
+          audioRef.current.play();
+        }
       }, 300);
     } catch (err) {
       setResponse("서버와 연결할 수 없습니다. " + err.message);
@@ -70,9 +85,14 @@ export default function VoicePage() {
     <div className="voice-bg">
       <div className="voice-header">Let us SOSAI</div>
 
-      <div className="voice-mic">
-        <Mic size={90} strokeWidth={2.2} />
-      </div>
+      <div
+  className="voice-mic"
+  onClick={handleStart}
+  style={{ cursor: "pointer" }}
+  title="마이크 클릭으로 음성 인식 시작"
+>
+  <Mic size={90} strokeWidth={2.2} color={listening ? "#888" : "#305078"} />
+</div>
 
       <div className="voice-guide">
         <b>
@@ -90,10 +110,47 @@ export default function VoicePage() {
         >
           {listening ? "듣는 중..." : "음성인식"}
         </button>
-        <button className="voice-btn outline" disabled={listening}>
+        <button
+          className="voice-btn outline"
+          onClick={handleTextInputClick}
+          disabled={listening}
+        >
           텍스트로 요청하기
         </button>
       </div>
+
+      {showInputBox && (
+        <div className="text-input-row" style={{ marginTop: 12 }}>
+          <input
+            type="text"
+            value={textInput}
+            onChange={(e) => setTextInput(e.target.value)}
+            placeholder="상황을 입력해 주세요."
+            style={{
+              padding: "8px",
+              fontSize: "16px",
+              border: "1px solid #ccc",
+              borderRadius: "6px",
+              width: "70%",
+              marginRight: "8px",
+            }}
+          />
+          <button
+            onClick={handleTextSubmit}
+            style={{
+              padding: "8px 16px",
+              fontSize: "16px",
+              backgroundColor: "#305078",
+              color: "#fff",
+              border: "none",
+              borderRadius: "6px",
+              cursor: "pointer",
+            }}
+          >
+            전송
+          </button>
+        </div>
+      )}
 
       {result && (
         <div className="voice-result">인식 결과: <b>{result}</b></div>
@@ -106,7 +163,6 @@ export default function VoicePage() {
           </>
         )}
 
-        {/* audioUrl이 있을 때만 렌더링 */}
         {audioUrl && (
           <audio
             ref={audioRef}
