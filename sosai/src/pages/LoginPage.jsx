@@ -13,23 +13,14 @@ export default function LoginPage() {
           <p className="login-subtitle">나 스스로 지키자</p>
         </div>
         <div className="login-btn-group">
-          <button
-            className="login-btn main"
-            onClick={() => navigate("/medical")}
-          >
+          <button className="login-btn main" onClick={() => navigate("/medical")}>
             의료 기초사항 작성하기
           </button>
           <div className="login-btn-row">
-            <button
-              className="login-btn sub"
-              onClick={() => navigate("/voice")}
-            >
+            <button className="login-btn sub" onClick={() => navigate("/voice")}>
               시작하기
             </button>
-            <button
-              className="login-btn sub outline"
-              onClick={() => navigate("/signup")}
-            >
+            <button className="login-btn sub outline" onClick={() => navigate("/signup")}>
               회원가입
             </button>
           </div>

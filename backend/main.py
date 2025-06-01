@@ -25,20 +25,20 @@ app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 def get_emergency_response(keyword):
     keyword = keyword.strip()
-    if keyword == "쓰러졌어요":
+    if any(kw in keyword for kw in ["쓰러", "넘어", "기절"]):
         return "지금 환자분이 의식이 있으신가요?"
-    elif keyword == ["아니요", "없어요"]:
+    elif any(kw in keyword for kw in [ "없", "아니"]):
         return (
             "지금 바로 119에 신고해 주세요. 그리고 심폐소생술을 시작해 주시겠어요?\n"
             "심폐소생술이 필요하시면 '심폐소생술' 또는 'CPR'이라고 말씀해 주세요."
         )
-    elif keyword == ["네", "있어요"]:
+    elif any(kw in keyword for kw in ["네", "응", "있"]):
         return "네, 알겠습니다. 환자분의 호흡과 상태를 계속 지켜봐 주세요. 필요하다면 언제든 다시 말씀해 주세요."
     elif keyword == "발작":
         return "환자분을 조심스럽게 옆으로 눕혀 주시고, 주변에 위험한 물건이 있다면 치워 주세요."
     elif keyword == "하임리히법":
         return "환자분 뒤에 서서, 두 팔로 환자분의 배를 감싸 잡고 명치 아래를 위쪽으로 힘껏 밀어 올려 주세요."
-    elif keyword in ["심폐소생술", "CPR"]:
+    elif any(kw in keyword for kw in ["심폐", "씨", "c"]):
         return (
             "심폐소생술(CPR) 방법을 안내드릴게요.\n"
             "1. 환자를 평평한 바닥에 눕히고, 무릎을 꿇고 앉아 주세요.\n"
@@ -48,7 +48,7 @@ def get_emergency_response(keyword):
             "5. 119가 도착하거나 환자가 움직이거나 숨을 쉴 때까지 반복해 주세요.\n"
             "추가 안내가 필요하시면 '자세히', '인공호흡', 'AED' 등으로 말씀해 주세요."
         )
-    elif keyword == "인공호흡":
+    elif any(kw in keyword for kw in ["인공", "호흡"]):
         return (
             "인공호흡 방법입니다.\n"
             "1. 환자의 기도를 확보해 주세요(머리를 젖히고 턱을 들어 올리기).\n"
@@ -75,7 +75,7 @@ def get_emergency_response(keyword):
 async def dialog(request: Request):
     data = await request.json()
     keyword = data.get("keyword", "")
-
+    print("🔥 받은 키워드:", keyword) 
     # 대화 응답
     response_text = get_emergency_response(keyword)
 
