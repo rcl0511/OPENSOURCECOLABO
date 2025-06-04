@@ -71,10 +71,15 @@ def get_emergency_response(keyword):
         return "죄송해요, 아직 그 상황은 인식하지 못했어요. 조금 더 구체적으로 말씀해 주실 수 있나요?"
 
 
+from pydantic import BaseModel
+
+class DialogRequest(BaseModel):
+    keyword: str
+
 @app.post("/dialog")
-async def dialog(request: Request):
-    data = await request.json()
-    keyword = data.get("keyword", "")
+async def dialog(req: DialogRequest):
+    keyword = req.keyword
+
     print("🔥 받은 키워드:", keyword) 
     # 대화 응답
     response_text = get_emergency_response(keyword)
