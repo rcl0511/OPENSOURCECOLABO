@@ -10,11 +10,13 @@ export default function VoicePage() {
   const [audioUrl, setAudioUrl] = useState(null);
   const [showInputBox, setShowInputBox] = useState(false);
   const [textInput, setTextInput] = useState("");
+<<<<<<< HEAD
   const [similarQuestions, setSimilarQuestions] = useState([]); // ✅ 유사질문 상태 추가
+=======
+>>>>>>> 70860896407a44768076bf476ca3efe331dc83bb
   const audioRef = useRef(null);
 
   const handleStart = () => {
-    console.log("음성인식 버튼 클릭됨");
     if (!("webkitSpeechRecognition" in window)) {
       alert("브라우저가 음성인식을 지원하지 않습니다.");
       return;
@@ -49,7 +51,6 @@ export default function VoicePage() {
   };
 
   const sendToServer = async (keyword) => {
-    console.log(">> fetch 준비: ", keyword);
     try {
       setResponse("AI 응답을 기다리는 중...");
       setAudioUrl(null);
@@ -59,7 +60,6 @@ export default function VoicePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ keyword }),
       });
-      console.log(">> fetch 응답: ", res);
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
@@ -69,7 +69,6 @@ export default function VoicePage() {
 
       const mp3url = `http://localhost:8000${data.audio_url}`;
       setAudioUrl(mp3url);
-      console.log("audioUrl:", mp3url);
 
       setTimeout(() => {
         if (audioRef.current) {
@@ -85,26 +84,50 @@ export default function VoicePage() {
   };
 
   return (
+<<<<<<< HEAD
     <div className="voice-bg">
       <div className="voice-header">Let us SOSkin</div>
 
       <div className="voice-mic" onClick={handleStart} style={{ cursor: "pointer" }}>
         <Mic size={90} strokeWidth={2.2} color={listening ? "#888" : "#305078"} />
+=======
+    <div className="voice-bg" style={{ padding: "30px", fontSize: "20px" }}>
+      <div className="voice-header" style={{ fontSize: "36px", fontWeight: "bold", marginBottom: "24px" }}>
+        Let us SOSAI
       </div>
 
-      <div className="voice-guide">
+      <div
+        className="voice-mic"
+        onClick={handleStart}
+        style={{ cursor: "pointer", marginBottom: "20px" }}
+        title="마이크 클릭으로 음성 인식 시작"
+      >
+        <Mic size={120} strokeWidth={2.5} color={listening ? "#888" : "#305078"} />
+>>>>>>> 70860896407a44768076bf476ca3efe331dc83bb
+      </div>
+
+      <div className="voice-guide" style={{ fontSize: "24px", marginBottom: "24px", textAlign: "center" }}>
         <b>
           현재 상황을 말씀해 주세요.<br />
           상황에 맞는 대처방법을 알려드리겠습니다
         </b>
       </div>
 
-      <div className="voice-btn-group">
+      <div className="voice-btn-group" style={{ marginBottom: "24px", gap: "16px" }}>
         <button
           className="voice-btn main"
           onClick={handleStart}
           disabled={listening}
-          style={{ background: listening ? "#ddd" : "#305078" }}
+          style={{
+            background: listening ? "#ddd" : "#305078",
+            color: "#fff",
+            padding: "16px 32px",
+            fontSize: "20px",
+            border: "none",
+            borderRadius: "12px",
+            marginRight: "12px",
+            cursor: "pointer",
+          }}
         >
           {listening ? "듣는 중..." : "음성인식"}
         </button>
@@ -112,36 +135,45 @@ export default function VoicePage() {
           className="voice-btn outline"
           onClick={handleTextInputClick}
           disabled={listening}
+          style={{
+            backgroundColor: "#fff",
+            color: "#305078",
+            padding: "16px 32px",
+            fontSize: "20px",
+            border: "2px solid #305078",
+            borderRadius: "12px",
+            cursor: "pointer",
+          }}
         >
           텍스트로 요청하기
         </button>
       </div>
 
       {showInputBox && (
-        <div className="text-input-row" style={{ marginTop: 12 }}>
+        <div className="text-input-row" style={{ marginTop: 16 }}>
           <input
             type="text"
             value={textInput}
             onChange={(e) => setTextInput(e.target.value)}
             placeholder="상황을 입력해 주세요."
             style={{
-              padding: "8px",
-              fontSize: "16px",
+              padding: "14px",
+              fontSize: "18px",
               border: "1px solid #ccc",
-              borderRadius: "6px",
-              width: "70%",
-              marginRight: "8px",
+              borderRadius: "8px",
+              width: "60%",
+              marginRight: "12px",
             }}
           />
           <button
             onClick={handleTextSubmit}
             style={{
-              padding: "8px 16px",
-              fontSize: "16px",
+              padding: "14px 24px",
+              fontSize: "18px",
               backgroundColor: "#305078",
               color: "#fff",
               border: "none",
-              borderRadius: "6px",
+              borderRadius: "8px",
               cursor: "pointer",
             }}
           >
@@ -150,16 +182,19 @@ export default function VoicePage() {
         </div>
       )}
 
-      {result && (
-        <div className="voice-result">인식 결과: <b>{result}</b></div>
-      )}
+{result && (
+  <div className="voice-result" style={{ fontSize: "24px", marginTop: "24px" }}>
+    인식 결과: <b>{result}</b>
+  </div>
+)}
 
-      <div className="voice-response">
-        {response && (
-          <>
-            <b>AI 응답:</b> {response}
-          </>
-        )}
+<div className="voice-response" style={{ fontSize: "24px", marginTop: "24px" }}>
+  {response && (
+    <>
+      <b>AI 응답:</b> {response}
+    </>
+  )}
+
 
         {/* ✅ 유사 질문 리스트 출력 */}
         {similarQuestions.length > 0 && (
@@ -181,7 +216,7 @@ export default function VoicePage() {
             src={audioUrl}
             controls
             autoPlay
-            style={{ marginTop: 8, width: "100%" }}
+            style={{ marginTop: 16, width: "100%" }}
             onError={() => alert("오디오 재생에 실패했습니다!")}
           >
             브라우저가 오디오 태그를 지원하지 않습니다.
@@ -189,7 +224,7 @@ export default function VoicePage() {
         )}
 
         {audioUrl && (
-          <div style={{ color: "blue", fontSize: 12 }}>
+          <div style={{ color: "blue", fontSize: 14, marginTop: 8 }}>
             audioUrl: {audioUrl}
           </div>
         )}

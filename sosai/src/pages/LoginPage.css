@@ -25,7 +25,7 @@
 
 .login-title {
   color: #fff;
-  font-size: 48px;
+  font-size: 100px;
   font-family: 'ABeeZee', 'Helvetica', Arial, sans-serif;
   letter-spacing: 1px;
   margin: 0;
@@ -33,7 +33,7 @@
 
 .login-subtitle {
   color: #fff;
-  font-size: 16px;
+  font-size: 50px;
   font-family: 'Poppins', 'Helvetica', Arial, sans-serif;
   margin-top: 10px;
 }
@@ -57,7 +57,7 @@
 
 .login-btn {
   padding: 14px 0;
-  font-size: 18px;
+  font-size: 30px;
   font-weight: 600;
   border-radius: 8px;
   border: none;
