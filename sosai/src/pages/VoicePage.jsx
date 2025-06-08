@@ -5,11 +5,12 @@ import { Mic } from "lucide-react";
 
 export default function VoicePage() {
   const [listening, setListening] = useState(false);
-  const [result, setResult] = useState("");       // 음성 인식 결과
-  const [response, setResponse] = useState("");   // 서버의 응답 멘트
-  const [audioUrl, setAudioUrl] = useState(null); // 오디오 URL
-  const [showInputBox, setShowInputBox] = useState(false); // 텍스트 입력창 표시 여부
-  const [textInput, setTextInput] = useState(""); // 텍스트 입력값
+  const [result, setResult] = useState("");
+  const [response, setResponse] = useState("");
+  const [audioUrl, setAudioUrl] = useState(null);
+  const [showInputBox, setShowInputBox] = useState(false);
+  const [textInput, setTextInput] = useState("");
+  const [similarQuestions, setSimilarQuestions] = useState([]); // ✅ 유사질문 상태 추가
   const audioRef = useRef(null);
 
   const handleStart = () => {
@@ -29,7 +30,7 @@ export default function VoicePage() {
     recognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript;
       setResult(transcript);
-      sendToServer(transcript); // 서버로 전송
+      sendToServer(transcript);
     };
 
     recognition.start();
@@ -47,12 +48,12 @@ export default function VoicePage() {
     setShowInputBox(false);
   };
 
-  // FastAPI 서버에 음성 결과 or 텍스트 전송
   const sendToServer = async (keyword) => {
     console.log(">> fetch 준비: ", keyword);
     try {
       setResponse("AI 응답을 기다리는 중...");
       setAudioUrl(null);
+      setSimilarQuestions([]); // 초기화
       const res = await fetch("http://localhost:8000/dialog", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -64,13 +65,15 @@ export default function VoicePage() {
       }
       const data = await res.json();
       setResponse(data.text);
-      const mp3url = `http://localhost:8000/${data.audio_url}`;
+      setSimilarQuestions(data.top_similar_questions || []); // ✅ 유사질문 저장
+
+      const mp3url = `http://localhost:8000${data.audio_url}`;
       setAudioUrl(mp3url);
       console.log("audioUrl:", mp3url);
 
       setTimeout(() => {
         if (audioRef.current) {
-          audioRef.current.playbackRate = 1.25; // ✅ 1.25배 속도 설정
+          audioRef.current.playbackRate = 1.25;
           audioRef.current.play();
         }
       }, 300);
@@ -83,16 +86,11 @@ export default function VoicePage() {
 
   return (
     <div className="voice-bg">
-      <div className="voice-header">Let us SOSAI</div>
+      <div className="voice-header">Let us SOSkin</div>
 
-      <div
-  className="voice-mic"
-  onClick={handleStart}
-  style={{ cursor: "pointer" }}
-  title="마이크 클릭으로 음성 인식 시작"
->
-  <Mic size={90} strokeWidth={2.2} color={listening ? "#888" : "#305078"} />
-</div>
+      <div className="voice-mic" onClick={handleStart} style={{ cursor: "pointer" }}>
+        <Mic size={90} strokeWidth={2.2} color={listening ? "#888" : "#305078"} />
+      </div>
 
       <div className="voice-guide">
         <b>
@@ -161,6 +159,20 @@ export default function VoicePage() {
           <>
             <b>AI 응답:</b> {response}
           </>
+        )}
+
+        {/* ✅ 유사 질문 리스트 출력 */}
+        {similarQuestions.length > 0 && (
+          <div style={{ marginTop: 10, fontSize: 14 }}>
+            <b>💡 유사한 질문:</b>
+            <ul style={{ marginTop: 4, paddingLeft: 16 }}>
+              {similarQuestions.map((item, idx) => (
+                <li key={idx}>
+                  {item.question} <span style={{ color: "#999", fontSize: 12 }}>({(item.similarity * 100).toFixed(1)}%)</span>
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
 
         {audioUrl && (

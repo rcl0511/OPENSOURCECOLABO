@@ -9,16 +9,11 @@ export default function LoginPage() {
     <div className="login-bg">
       <div className="login-card">
         <div className="login-header">
-          <h1 className="login-title">SOSAI</h1>
-          <p className="login-subtitle">나 스스로 지키자</p>
+          <h1 className="login-title">SOSkin</h1>
+          <p className="login-subtitle">화상 응급 가이드 앱</p>
         </div>
         <div className="login-btn-group">
-          <button
-            className="login-btn main"
-            onClick={() => navigate("/medical")}
-          >
-            의료 기초사항 작성하기
-          </button>
+
           <div className="login-btn-row">
             <button
               className="login-btn sub"
@@ -30,7 +25,7 @@ export default function LoginPage() {
               className="login-btn sub outline"
               onClick={() => navigate("/signup")}
             >
-              회원가입
+              사진찍기
             </button>
           </div>
         </div>
