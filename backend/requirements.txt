@@ -1,4 +1,8 @@
 fastapi
 uvicorn
+torch
+torchvision
+Pillow
 gtts
-pydantic
+requests
+python-multipart

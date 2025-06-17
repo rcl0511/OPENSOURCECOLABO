@@ -4,6 +4,7 @@
   background-color: #f8f9fa;
   min-height: 100vh;
   box-sizing: border-box;
+    padding-bottom: 100px;
 }
 
 .voice-header {
@@ -23,24 +24,27 @@
 
 .voice-guide {
   text-align: center;
-  font-size: 16px;
+  font-size: 18px;
   margin-bottom: 24px;
-  color: #555;
+  color: #333;
 }
 
 .voice-btn-group {
   display: flex;
   justify-content: center;
+  flex-wrap: wrap;
   gap: 12px;
   margin-bottom: 20px;
 }
 
 .voice-btn {
-  padding: 12px 20px;
-  font-size: 16px;
-  border-radius: 6px;
+  padding: 14px 28px;
+  font-size: 17px;
+  border-radius: 8px;
   border: none;
   cursor: pointer;
+  background-color: #305078;
+  color: white;
   transition: 0.3s;
 }
 
@@ -70,45 +74,145 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 10px;
+  margin-top: 16px;
 }
 
 .text-input-field {
-  padding: 10px;
+  padding: 12px;
   font-size: 16px;
   border: 1px solid #ccc;
-  border-radius: 6px;
-  width: 70%;
-  margin-right: 10px;
+  border-radius: 8px;
+  width: 60%;
+  margin-right: 12px;
 }
 
 .text-submit-btn {
-  padding: 10px 16px;
+  padding: 12px 20px;
   font-size: 16px;
   background-color: #2C6EFF;
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
 }
 
 .voice-result {
   text-align: center;
-  font-size: 16px;
-  margin-top: 20px;
+  font-size: 18px;
+  margin-top: 24px;
   color: #444;
 }
 
-.voice-response {
-  margin-top: 20px;
-  font-size: 16px;
-  color: #222;
-  padding: 0 12px;
+.voice-response img {
+  display: block;
+  margin: 0 auto;
+  max-width: 220px;
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  margin-top: 0px;
+  margin-bottom: 24px;  /* ✅ 아래쪽 간격 확보 */
 }
+
+
+.prediction-result {
+  margin-top: 12px;
+  font-weight: bold;
+  font-size: 18px;
+  color: #305078;
+}
+
+
+.similar-question-list {
+  margin-top: 12px;
+  font-size: 15px;
+  padding-left: 20px;
+  color: #666;
+}
+
+.similar-question-list li {
+  margin-bottom: 4px;
+}
+
+.upload-btn-group {
+  margin-top: 24px;
+  text-align: center;
+}
+
+.upload-btn-group label {
+  margin: 0 8px;
+}
+
+.image-preview {
+  display: flex;
+  justify-content: center;
+  margin-top: 24px;
+}
+
+.image-preview img {
+  width: 100%;
+  max-width: 300px;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
 
 audio {
   display: block;
-  margin: 12px auto 0 auto;
+  margin: 16px auto 0 auto;
   width: 100%;
   max-width: 500px;
+}
+.prediction-result {
+  margin-top: 12px;
+  font-weight: bold;
+  font-size: 18px;
+  color: #305078;
+  background-color: #fff;   /* 글씨 배경 흰색 추가 */
+  padding: 12px;             /* 내부 여백 */
+  border-radius: 8px;        /* 둥글게 */
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.05); /* 살짝 그림자 */
+  position: relative;        /* z-index 적용 가능하게 설정 */
+  z-index: 10;               /* 다른 요소보다 위로 */
+}
+.solution-text {
+  margin-top: 12px;
+  font-size: 16px;
+  color: #333;
+  background-color: #f1f1f1;
+  padding: 14px;
+  border-radius: 8px;
+  white-space: pre-wrap;   /* 줄바꿈 반영되도록 */
+  line-height: 1.6;
+}
+
+
+
+.result-section {
+  display: flex;
+  flex-direction: row; /* 사진과 예측 결과를 가로 배치 */
+  align-items: flex-start;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.result-section .image-preview img {
+  width: 100%;
+  max-width: 300px;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.result-section .prediction-result {
+  max-width: 500px;
+  min-height: 320px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background-color: #fff;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
 }

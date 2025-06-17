@@ -1,33 +1,37 @@
-from pydantic import BaseModel
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from gtts import gTTS
-import os
+from pydantic import BaseModel
+from PIL import Image
+import torchvision.transforms as transforms
+import torch.nn as nn
+import torch
 import uuid
+import os
 import requests
-
+import io
+# =================== 기본 설정 ===================
 app = FastAPI()
 
-# CORS 설정
+# CORS 허용
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # 모든 도메인 허용
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# 정적 파일 설정
+# 정적 파일 저장 폴더 설정
 STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
 os.makedirs(STATIC_DIR, exist_ok=True)
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
-# ✅ Colab 주소를 여기에 입력
-COLAB_API_URL = "https://886a-34-16-166-76.ngrok-free.app/answer"
+# =================== Colab 연동 설정 ===================
+COLAB_API_URL = "https://c66a-34-87-87-92.ngrok-free.app/answer"
 
-# ✅ Colab 연동 함수
 def get_answer_from_colab(keyword: str):
     try:
         res = requests.post(COLAB_API_URL, json={"keyword": keyword})
@@ -38,30 +42,94 @@ def get_answer_from_colab(keyword: str):
     except Exception as e:
         return {"answer": f"❌ Colab 연결 실패: {e}", "top_similar_questions": []}
 
-# ✅ /dialog → Colab에 질문 전달 → TTS 응답 + 유사 질문 리스트
+# =================== 음성 챗봇 API ===================
 @app.post("/dialog")
 async def dialog(request: Request):
     data = await request.json()
     keyword = data.get("keyword", "")
 
-    # Colab에서 응답 받기
     result = get_answer_from_colab(keyword)
     response_text = result.get("answer", "❌ Colab에서 응답을 받지 못했어요.")
     top_questions = result.get("top_similar_questions", [])
 
-    # 음성 생성
     filename = f"{uuid.uuid4()}.mp3"
     filepath = os.path.join(STATIC_DIR, filename)
+
     tts = gTTS(text=response_text, lang="ko")
     tts.save(filepath)
 
     return JSONResponse({
         "text": response_text,
-        "audio_url": f"/static/{filename}",  # ✅ 수정
-    "top_similar_questions": top_questions
+        "audio_url": f"/static/{filename}",
+        "top_similar_questions": top_questions
     })
 
-# 서버 상태 확인
+# =================== 이미지 분류 모델 설정 ===================
+from torchvision.models import efficientnet_b0, EfficientNet_B0_Weights
+
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
+def get_image_model(num_classes=3):
+    weights = EfficientNet_B0_Weights.DEFAULT
+    model = efficientnet_b0(weights=weights)
+    in_features = model.classifier[1].in_features
+    model.classifier[1] = nn.Linear(in_features, num_classes)
+    return model
+
+image_model = get_image_model()
+model_path = os.path.join(os.path.dirname(__file__), "best_model.pt")
+image_model.load_state_dict(torch.load(model_path, map_location=device))
+image_model.eval().to(device)
+
+def predict_image(file: UploadFile):
+    image = Image.open(file.file).convert("RGB")
+    transform = transforms.Compose([
+        transforms.Resize((224, 224)),
+        transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406],
+                             [0.229, 0.224, 0.225])
+    ])
+    tensor = transform(image).unsqueeze(0).to(device)
+
+    with torch.no_grad():
+        output = image_model(tensor)
+        _, predicted = torch.max(output, 1)
+    return int(predicted.item())
+
+# =================== 이미지 예측 API ===================
+@app.post("/predict-image")
+async def predict_image_api(file: UploadFile = File(...)):
+    try:
+        contents = await file.read()
+
+        try:
+            image = Image.open(io.BytesIO(contents)).convert("RGB")
+        except Exception as e:
+            return JSONResponse({"error": f"이미지를 열 수 없습니다: {e}"}, status_code=400)
+
+        transform = transforms.Compose([
+            transforms.Resize((224, 224)),
+            transforms.ToTensor(),
+            transforms.Normalize([0.485, 0.456, 0.406],
+                                 [0.229, 0.224, 0.225])
+        ])
+        tensor = transform(image).unsqueeze(0).to(device)
+
+        with torch.no_grad():
+            output = image_model(tensor)
+            _, predicted = torch.max(output, 1)
+
+        return JSONResponse({
+            "prediction": int(predicted.item()),
+            "text": "응급 이미지 예측 결과입니다.",
+            "audio_url": None,
+            "top_similar_questions": []
+        })
+
+    except Exception as e:
+        return JSONResponse({"error": f"서버 내부 오류: {e}"}, status_code=500)
+
+# =================== 루트 페이지 ===================
 @app.get("/")
 def root():
-    return {"message": "🔥 응급처치 TTS 서버가 Colab과 연결되어 실행 중입니다."}
+    return {"message": "🔥 응급처치 TTS + 이미지 예측 서버가 실행 중입니다."}
