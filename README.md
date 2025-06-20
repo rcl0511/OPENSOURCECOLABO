@@ -95,6 +95,9 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8000
 COLAB_API_URL = "https://8c78-xxx-xxx-xxx.ngrok-free.app/answer"
 
 
+
+
+
 **향후 계획 (Planned Improvements)**
 실시간 웹캠 연동 기능 추가
 모바일 앱(PWA) 변환
