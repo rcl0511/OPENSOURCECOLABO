@@ -74,12 +74,14 @@ pip freeze
 ```bash
 cd /sosai
 npm start
+```
+
 
 백엔드 실행 (FastAPI)
 ```bash
 cd /backend
-`uvicorn main:app --reload --host 0.0.0.0 --port 8000`
-
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
 ## Colab에서 ngrok 주소 연동하는 방법
 
 1️⃣ ngrok 인증키 등록 (최초 1회만 실행)
