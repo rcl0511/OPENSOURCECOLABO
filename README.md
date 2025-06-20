@@ -1,8 +1,7 @@
-##화상응급 상황 자동 안내 시스템##
+# 🔥 SOSKIN: 화상 응급상황 자동 안내 시스템
 
-SOSKIN은 사용자가 화상을 입었을 때, 스마트폰/PC를 통해 📷 사진을 업로드하거나 음성/텍스트로 질문하면,  
-AI가 화상의 정도를 자동 분석하고,  
-적절한 응급처치 지침을 텍스트 및 음성으로 제공하는 Python 기반 시스템입니다.
+**SOSKIN**은 화상 응급상황 발생 시, 사용자가 사진을 업로드하거나 음성·텍스트로 질문하면,  
+AI가 자동으로 화상의 정도를 분석하고 적절한 응급처치 지침을 텍스트 및 음성으로 제공하는 Python 기반 시스템입니다.
 
 **주요 기능**
 
@@ -30,11 +29,11 @@ CHATBOT(COLAB)
 
 
 - main.py: 전체 서버 구동 및 API 라우터
-- chatbot.py (또는 내부 함수): 사용자 질의 → 유사 질환/의도 매칭 → 적절한 답변 생성
+- soskin_chatbot.ipynb: 사용자 질의 → 유사 질환/의도 매칭 → 적절한 답변 생성
+
+
   
 **Key Features**
-
- 
 - Burn Image Classification
   - Kaggle 화상 이미지 데이터셋 기반 CNN 모델로 1도, 2도, 3도 화상 분류
   - 사용자 업로드 사진 분석 후 응급처치 가이드 연결
@@ -70,15 +69,22 @@ pip install fastapi uvicorn gtts pygame
 pip freeze
 
 
+**서버 실행**
+# 프론트엔드
+cd /sosai  npm start
+# 백엔드
+cd /backend  uvicorn main:app --reload --host 0.0.0.0 --port 8000
 
-프론트 /sosai : npm start
-백엔드/backend : py -m uvicorn main:app --reload --host 0.0.0.0 --port 8000
+# Colab에서 ngrok 주소 연동하는 방법
+1. ngrok 인증키 등록 (최초 1회만 필요) : !ngrok config add-authtoken <your_personal_ngrok_auth_token>
+2. Colab에서 실행 시 ngrok 주소 확인 : ✅ 서버 주소: NgrokTunnel: "https://8c78-xxx-xxx-xxx.ngrok-free.app" -> "http://localhost:5000"
+3. 3. main.py 코드에서 서버 주소 수정 : 
+# 🔁 Colab에서 실시간 할당된 ngrok 주소를 직접 붙여넣기
+COLAB_API_URL = "https://8c78-xxx-xxx-xxx.ngrok-free.app/answer"
 
-**프로그램 실행**
-가상환경 사용 권장
-python -m venv .venv
-.venv\Scripts\activate
-python main.py
+
+
+
 
 **향후 계획 (Planned Improvements)**
 실시간 웹캠 연동 기능 추가
