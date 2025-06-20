@@ -71,29 +71,25 @@ pip freeze
 
 ## 서버 실행 방법
 
-### 프론트엔드 실행
 ```bash
 cd /sosai
 npm start
 
-### 백엔드 실행
+백엔드 실행 (FastAPI)
 ```bash
 cd /backend
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+`uvicorn main:app --reload --host 0.0.0.0 --port 8000`
 
 ## Colab에서 ngrok 주소 연동하는 방법
 
-### 1️⃣ ngrok 인증키 등록 (최초 1회만 실행)
-```bash
+1️⃣ ngrok 인증키 등록 (최초 1회만 실행)
 !ngrok config add-authtoken <your_personal_ngrok_auth_token>
 
-### 2️⃣ Colab 실행 시 ngrok 주소 확인
-```bash
+2️⃣ Colab 실행 시 ngrok 주소 확인
 ✅ 서버 주소: NgrokTunnel: "https://8c78-xxx-xxx-xxx.ngrok-free.app" -> "http://localhost:5000"
 
- ### 3️⃣ main.py 코드에서 ngrok 주소 수정
-```bash
-# 🔁 Colab에서 실시간으로 할당된 ngrok 주소를 여기에 입력
+3️⃣ main.py 코드에서 ngrok 주소 수정
+: Colab에서 실시간으로 할당된 ngrok 주소를 여기에 입력
 COLAB_API_URL = "https://8c78-xxx-xxx-xxx.ngrok-free.app/answer"
 
 
@@ -102,7 +98,6 @@ COLAB_API_URL = "https://8c78-xxx-xxx-xxx.ngrok-free.app/answer"
 모바일 앱(PWA) 변환
 다국어 처리 (Multilingual TTS)
 화상 외 다른 응급상황(절단, 출혈 등)으로 범위 확장
-
 
 
 
