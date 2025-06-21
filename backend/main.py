@@ -45,43 +45,24 @@ def get_answer_from_colab(keyword: str):
 # =================== 음성 챗봇 API ===================
 @app.post("/dialog")
 async def dialog(request: Request):
-    try:
-        # (1) JSON 파싱 예외 처리
-        data = await request.json()
-        keyword = data.get("keyword", "")
+    data = await request.json()
+    keyword = data.get("keyword", "")
 
-        if not keyword:
-            return JSONResponse(status_code=400, content={"error": "keyword 값이 비어 있습니다."})
+    result = get_answer_from_colab(keyword)
+    response_text = result.get("answer", "❌ Colab에서 응답을 받지 못했어요.")
+    top_questions = result.get("top_similar_questions", [])
 
-        # (2) Colab 결과 가져오기
-        result = get_answer_from_colab(keyword)
-        if not result or not isinstance(result, dict):
-            return JSONResponse(status_code=502, content={"error": "Colab에서 유효한 응답을 받지 못했습니다."})
+    filename = f"{uuid.uuid4()}.mp3"
+    filepath = os.path.join(STATIC_DIR, filename)
 
-        response_text = result.get("answer") or result.get("text") or "❌ Colab에서 응답을 받지 못했어요."
-        top_questions = result.get("top_similar_questions", [])
+    tts = gTTS(text=response_text, lang="ko")
+    tts.save(filepath)
 
-        # (3) gTTS 예외 처리
-        filename = f"{uuid.uuid4()}.mp3"
-        filepath = os.path.join(STATIC_DIR, filename)
-
-        try:
-            tts = gTTS(text=response_text, lang="ko")
-            tts.save(filepath)
-        except Exception as tts_error:
-            print("TTS 변환 실패:", tts_error)
-            filepath = None
-
-        # (4) 응답 반환
-        return JSONResponse({
-            "text": response_text,
-            "audio_url": f"/static/{filename}" if filepath else "",
-            "top_similar_questions": top_questions
-        })
-
-    except Exception as e:
-        print("❌ /dialog 처리 중 오류:", e)
-        return JSONResponse(status_code=500, content={"error": "서버 내부 오류", "detail": str(e)})
+    return JSONResponse({
+        "text": response_text,
+        "audio_url": f"/static/{filename}",
+        "top_similar_questions": top_questions
+    })
 
 
 # =================== 이미지 분류 모델 설정 ===================
