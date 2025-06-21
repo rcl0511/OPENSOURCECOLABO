@@ -21,7 +21,7 @@ app.add_middleware(
     allow_origins=["*"],  # 모든 도메인 허용
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"],
+    allow_headers=["*"]
 )
 
 # 정적 파일 저장 폴더 설정
