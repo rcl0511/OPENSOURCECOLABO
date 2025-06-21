@@ -64,7 +64,6 @@ async def dialog(request: Request):
         "top_similar_questions": top_questions
     })
 
-
 # =================== 이미지 분류 모델 설정 ===================
 from torchvision.models import efficientnet_b0, EfficientNet_B0_Weights
 
