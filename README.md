@@ -1,47 +1,8 @@
-# 🔥 SOSKIN: 화상 응급상황 자동 안내 시스템
+##화상응급 상황 자동 안내 시스템
 
-
-**SOSKIN**은 화상 응급상황 발생 시, 사용자가 사진을 업로드하거나 음성·텍스트로 질문하면,  
-AI가 자동으로 화상의 정도를 분석하고 적절한 응급처치 지침을 텍스트 및 음성으로 제공하는 Python 기반 시스템입니다.
-
-**실행 방법 (Run Instructions)**
-
-필요한 라이브러리 설치
-pip install -r requirements.txt
-pip install openai-whisper gtts sounddevice wavio numpy
-pip install gtts
-pip install fastapi uvicorn gtts pygame
-pip freeze
-
-
-## 서버 실행 방법
-
-```bash
-cd /sosai
-npm start
-```
-
-
-백엔드 실행 (FastAPI)
-```bash
-cd /backend
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
-```
-## Colab에서 ngrok 주소 연동하는 방법
-
-1️⃣ ngrok 인증키 등록 (최초 1회만 실행)
-!ngrok config add-authtoken <your_personal_ngrok_auth_token>
-
-2️⃣ Colab 실행 시 ngrok 주소 확인
-✅ 서버 주소: NgrokTunnel: "https://8c78-xxx-xxx-xxx.ngrok-free.app" -> "http://localhost:5000"
-
-3️⃣ main.py 코드에서 ngrok 주소 수정
-: Colab에서 실시간으로 할당된 ngrok 주소를 여기에 입력
-COLAB_API_URL = "https://8c78-xxx-xxx-xxx.ngrok-free.app/answer"
-
-## 코랩과 함께 필요한 파일 링크 공유
-https://drive.google.com/drive/folders/1RlewYfMUP55x5O6gGAgeSL9kgkzHh19T?usp=drive_link
-
+SOSKIN은 사용자가 화상을 입었을 때, 스마트폰/PC를 통해 📷 사진을 업로드하거나 음성/텍스트로 질문하면,  
+AI가 화상의 정도를 자동 분석하고,  
+적절한 응급처치 지침을 텍스트 및 음성으로 제공하는 Python 기반 시스템입니다.
 
 **주요 기능**
 
@@ -69,11 +30,11 @@ CHATBOT(COLAB)
 
 
 - main.py: 전체 서버 구동 및 API 라우터
-- soskin_chatbot.ipynb: 사용자 질의 → 유사 질환/의도 매칭 → 적절한 답변 생성
-
-
+- chatbot.py (또는 내부 함수): 사용자 질의 → 유사 질환/의도 매칭 → 적절한 답변 생성
   
 **Key Features**
+
+ 
 - Burn Image Classification
   - Kaggle 화상 이미지 데이터셋 기반 CNN 모델로 1도, 2도, 3도 화상 분류
   - 사용자 업로드 사진 분석 후 응급처치 가이드 연결
@@ -99,16 +60,32 @@ CHATBOT(COLAB)
 - 웹·모바일 UI 연동 준비
 - React 프론트엔드와의 연동을 통해 사용자 친화적 UI 구현 가능
 
+**실행 방법 (Run Instructions)**
+
+필요한 라이브러리 설치
+pip install -r requirements.txt
+pip install openai-whisper gtts sounddevice wavio numpy
+pip install gtts
+pip install fastapi uvicorn gtts pygame
+pip freeze
 
 
 
+프론트 /sosai : npm start
+백엔드/backend : py -m uvicorn main:app --reload --host 0.0.0.0 --port 8000
 
+**프로그램 실행**
+가상환경 사용 권장
+python -m venv .venv
+.venv\Scripts\activate
+python main.py
 
 **향후 계획 (Planned Improvements)**
 실시간 웹캠 연동 기능 추가
 모바일 앱(PWA) 변환
 다국어 처리 (Multilingual TTS)
 화상 외 다른 응급상황(절단, 출혈 등)으로 범위 확장
+
 
 
 
@@ -127,7 +104,7 @@ CHATBOT(COLAB)
 
 MIT License
 
-Copyright (c) 2025 OPENSOURCECOLABO
+Copyright (c) 2024 OPENSOURCECOLABO
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
