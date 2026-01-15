@@ -182,7 +182,7 @@ export default function VoicePage() {
 
   return (
     <div className="voice-bg">
-      <div className="voice-header">Let us SOSkin</div>
+      <div className="voice-header">Let us SOSAI</div>
 
       <div className="voice-mic" onClick={handleStart} style={{ cursor: "pointer" }}>
         <Mic size={90} strokeWidth={2.2} color={listening ? "#888" : "#305078"} />
@@ -192,7 +192,7 @@ export default function VoicePage() {
         <b>
           현재 상황을 말씀해 주세요.
           <br />
-          상황에 맞는 대처방법을 알려드리겠습니다
+          상황에 맞는 대처방법을<br /> 알려드리겠습니다
         </b>
       </div>
 
@@ -210,12 +210,7 @@ export default function VoicePage() {
         </button>
         <input type="file" accept="image/*" capture="environment" id="cameraInput" style={{ display: "none" }} onChange={handleImageChange} />
         <input type="file" accept="image/*" id="galleryInput" style={{ display: "none" }} onChange={handleImageChange} />
-        <label htmlFor="cameraInput" className="voice-btn main">
-          사진찍기
-        </label>
-        <label htmlFor="galleryInput" className="voice-btn outline">
-          갤러리
-        </label>
+
       </div>
 
       {showInputBox && (

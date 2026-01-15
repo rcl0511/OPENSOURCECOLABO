@@ -9,8 +9,8 @@ export default function LoginPage() {
     <div className="login-bg">
       <div className="login-card">
         <div className="login-header">
-          <h1 className="login-title">SOSkin</h1>
-          <p className="login-subtitle">화상 응급 가이드 앱</p>
+          <h1 className="login-title">SOSAI</h1>
+          <p className="login-subtitle">실시간 응급 가이드 앱</p>
         </div>
         <div className="login-btn-group">
 
@@ -25,7 +25,7 @@ export default function LoginPage() {
               className="login-btn sub outline"
               onClick={() => navigate("/signup")}
             >
-              사진찍기
+              회원가입
 
             </button>
           </div>
