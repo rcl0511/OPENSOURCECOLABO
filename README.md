@@ -1,96 +1,46 @@
-##화상응급 상황 자동 안내 시스템
+응급 상황 자동 안내 시스템
 
-SOSKIN은 사용자가 화상을 입었을 때, 스마트폰/PC를 통해 📷 사진을 업로드하거나 음성/텍스트로 질문하면,  
-AI가 화상의 정도를 자동 분석하고,  
-적절한 응급처치 지침을 텍스트 및 음성으로 제공하는 Python 기반 시스템입니다.
+이 프로젝트는 사용자가 음성으로 응급 상황을 설명하면,
+보유하고 있는 대화 데이터와 시나리오를 바탕으로
+상황에 맞는 단계별 안내 문장을 생성하여
+TTS(Text to Speech)로 음성 안내를 제공하는 Python 기반 프로그램입니다.
 
-**주요 기능**
+주요 기능
 
-화상 이미지 분석
-- Kaggle 데이터셋 기반 CNN 화상 분류 모델 탑재 (1도/2도/3도 화상 자동 판별)
-- 사용자가 업로드한 이미지 분석 후 분류 결과 제공
+사용자의 음성 입력을 텍스트로 변환합니다
+
 내부 데이터와 매칭하여 적합한 대화 흐름을 선택합니다
 
-AI QnA 응급처치 안내
-- AIHub 헬스케어 QnA 데이터 기반 질의응답
-- 질문 데이터: 화상 관련 질의와 임베딩 벡터 포함 (.pkl 파일)
-- 답변 데이터: 화상_치료/예방/대응 등 질환_의도별 실제 답변 텍스트 (.csv 파일)
+상황에 맞는 안내 문장을 TTS로 변환하여 음성으로 안내합니다
 
-CHATBOT(COLAB)
-- 유사 질의 분석 및 대응: 사용자의 질의에 대해 SBERT 임베딩 기반 유사도 분석을 수행하여 가장 관련성 높은 '질환_의도'를 찾고 응답합니다.
-- 질환 중심 의도 기반 응답 전환: "화상_진단" 또는 "화상_원인"과 같은 의도를 "화상_치료"로 자동 전환하여 실제 처치 중심 응답을 우선 제공합니다.
-- 우선 키워드 필터링: 응답 후보 중 '조치', '예방', '응급', '연고' 등 중요 키워드 포함 응답을 우선 추출하여 응급 대응에 적합한 응답을 제공합니다.
-- Flask API 서버: POST 요청으로 키워드 질의를 보내면 JSON 형태로 응답을 받는 RESTful API로 구성됩니다.
-- pyngrok을 이용한 외부 접근 가능 로컬 서버 구현.
+예를 들어 사용자가 쓰러졌어요 라고 말하면 의식이 있나요 등의 후속 질문과 안내를 단계별로 제공합니다
 
-음성 입출력
-- Whisper 기반 STT(음성 → 텍스트) 변환
-- gTTS 기반 TTS(텍스트 → 음성) 안내 제공
-- "물집이 생겼어요", "화상 부위가 부어요" 등의 자연어 질의 처리 가능
+-Key Features
+  - Voice recognition (speech-to-text)
+  - Automated situation detection (keywords)
+  - Customized AI-guided response for emergency scenarios (ex: CPR, seizure, choking)
+  - Real-time TTS audio generation (Korean)
+  - Web-based user interface (React)
 
-
-- main.py: 전체 서버 구동 및 API 라우터
-- chatbot.py (또는 내부 함수): 사용자 질의 → 유사 질환/의도 매칭 → 적절한 답변 생성
-  
-**Key Features**
-
- 
-- Burn Image Classification
-  - Kaggle 화상 이미지 데이터셋 기반 CNN 모델로 1도, 2도, 3도 화상 분류
-  - 사용자 업로드 사진 분석 후 응급처치 가이드 연결
-
-- Semantic Search-Based QnA Chatbot
-  - Ko-SBERT 모델을 활용한 자연어 질의 응답 시스템
-  - 사용자의 화상 관련 질문에 대해 유사한 질환_의도 추출 및 대응 응답 제공
-
-- Context-Aware Answer Switching
-  - '화상_진단' 또는 '화상_원인' 질의가 입력되면 자동으로 '화상_치료' 중심으로 응답 전환
-  - 즉, 진단성 질의에도 실제 처치 중심 정보 제공
-
-- Priority Keyword Filtering
-  - ‘조치’, ‘응급’, ‘예방’, ‘냉찜질’, ‘연고’ 등 실질적 행동 안내 포함 응답을 우선적으로 제공
-
-- TTS (Text-to-Speech) 안내 기능
-  - Google TTS API 연동으로 응급처치 응답을 음성으로 안내 (한국어)
-
-- RESTful API Interface
-  - Flask 기반 API 서버, `/answer` endpoint로 POST 요청 시 JSON 응답 반환
-  - pyngrok을 통한 외부 접속 가능 서버 구성
-
-- 웹·모바일 UI 연동 준비
-- React 프론트엔드와의 연동을 통해 사용자 친화적 UI 구현 가능
-
-**실행 방법 (Run Instructions)**
+실행 방법
 
 필요한 라이브러리 설치
 pip install -r requirements.txt
-pip install openai-whisper gtts sounddevice wavio numpy
-pip install gtts
-pip install fastapi uvicorn gtts pygame
-pip freeze
 
-
-
-프론트 /sosai : npm start
-백엔드/backend : py -m uvicorn main:app --reload --host 0.0.0.0 --port 8000
-
-**프로그램 실행**
 가상환경 사용 권장
 python -m venv .venv
 .venv\Scripts\activate
+
+프로그램 실행
 python main.py
 
-**향후 계획 (Planned Improvements)**
-실시간 웹캠 연동 기능 추가
-모바일 앱(PWA) 변환
-다국어 처리 (Multilingual TTS)
-화상 외 다른 응급상황(절단, 출혈 등)으로 범위 확장
+향후 계획
+더 다양한 응급 상황 데이터 추가
+음성 인식 정확도 개선
+웹 또는 모바일 연동 등 확장 개발
 
 
-
-
-
-**저작권 및 라이선스 안내**
+저작권 및 라이선스 안내
 
 본 프로젝트의 소스코드 및 데이터는 모두 오픈소스 목적으로 작성되었습니다.
 프로젝트 내 소스코드, 문서, 샘플 데이터 등은 MIT 라이선스를 따릅니다.
