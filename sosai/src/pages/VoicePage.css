@@ -1,5 +1,5 @@
 .voice-bg {
-  padding: 24px;
+  padding: 100px;
   font-family: 'Segoe UI', sans-serif;
   background-color: #f8f9fa;
   min-height: 100vh;
@@ -8,7 +8,7 @@
 }
 
 .voice-header {
-  font-size: 28px;
+  font-size: 30px;
   font-weight: bold;
   color: #ff2c2c;
   text-align: center;

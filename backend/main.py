@@ -30,7 +30,7 @@ os.makedirs(STATIC_DIR, exist_ok=True)
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 # =================== Colab 연동 설정 ===================
-COLAB_API_URL = "https://c66a-34-87-87-92.ngrok-free.app/answer"
+COLAB_API_URL = "https://77db-34-169-180-80.ngrok-free.app/answer"
 
 def get_answer_from_colab(keyword: str):
     try:

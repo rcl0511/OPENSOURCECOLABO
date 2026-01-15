@@ -101,7 +101,7 @@ export default function Medical() {
                 />
               </label>
               <label>
-                복용약
+                기저질환
                 <input
                   name="medications"
                   value={form.medications}
@@ -110,7 +110,16 @@ export default function Medical() {
                 />
               </label>
               <label>
-                응급 시 주의사항
+                병력/ 수술이력
+                <input
+                  name="emergency"
+                  value={form.emergency}
+                  onChange={onChange}
+                  placeholder="없음"
+                />
+              </label>
+              <label>
+                응급연락망
                 <input
                   name="emergency"
                   value={form.emergency}
@@ -145,13 +154,16 @@ export default function Medical() {
                 <b>혈액형:</b> {form.blood || <span className="medical-null">미입력</span>}
               </div>
               <div>
-                <b>알레르기:</b> {form.allergies || <span className="medical-null">없음</span>}
+                <b>병력/ 수술이력:</b> {form.allergies || <span className="medical-null">없음</span>}
               </div>
               <div>
                 <b>복용약:</b> {form.medications || <span className="medical-null">없음</span>}
               </div>
               <div>
-                <b>응급 시 주의사항:</b> {form.emergency || <span className="medical-null">없음</span>}
+                <b>알레르기:</b> {form.allergies || <span className="medical-null">없음</span>}
+              </div>
+              <div>
+                <b>응급연락망:</b> {form.emergency || <span className="medical-null">없음</span>}
               </div>
               <button className="medical-btn outline" style={{ marginTop: 18 }} onClick={startEdit}>
                 정보 수정하기

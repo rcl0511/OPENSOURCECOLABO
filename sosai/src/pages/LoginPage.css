@@ -13,7 +13,7 @@
 }
 
 .login-header {
-  background: #e03232;
+  background: #2C6EFF;
   height: 400px;
   border-radius: 0 0 48px 48px;
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
@@ -67,17 +67,17 @@
 }
 
 .login-btn.main {
-  background: #fd4343;
+  background: #2C6EFF;
   color: #fff;
 }
 
 .login-btn.sub {
-  background: #ff2c2c;
+  background: #2C6EFF;
   color: #fff;
 }
 
 .login-btn.outline {
   background: #fff;
-  color: #fc3838;
-  border: 2px solid #ff3737;
+  color: #2C6EFF;
+  border: 2px solid #2C6EFF;
 }
