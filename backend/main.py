@@ -26,7 +26,7 @@ app = FastAPI()
 # ✅ 운영에서는 allow_origins를 Netlify 도메인으로 좁히는 걸 추천
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # 나중에 ["https://sosaii.netlify.app"] 로 변경 추천
+    allow_origins=["https://sosaii.netlify.app"], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"]

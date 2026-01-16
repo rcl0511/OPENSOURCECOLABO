@@ -1,7 +1,20 @@
-.venv/
+# python
 __pycache__/
 *.pyc
+.venv/
+venv/
+backend/venv/
+sosai/node_modules/
 
+
+# node
+node_modules/
+build/
+
+# env
 .env
 backend/.env
+
+# only large model files (선별)
+backend/models/*.pt
 backend/static/
