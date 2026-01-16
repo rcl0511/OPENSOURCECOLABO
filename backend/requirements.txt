@@ -6,3 +6,5 @@ Pillow
 gtts
 requests
 python-multipart
+pandas
+sentence-transformers
