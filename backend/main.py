@@ -1,209 +1,340 @@
-from fastapi import FastAPI, Request, UploadFile, File
+# main.py
+import os
+import io
+import re
+import uuid
+import time
+import logging
+from typing import Optional, List, Dict, Any
+
+import torch
+import torch.nn as nn
+import torchvision.transforms as transforms
+from torchvision.models import efficientnet_b0, EfficientNet_B0_Weights
+from routes_auth import router as auth_router
+from routes_medical import router as medical_router
+from PIL import Image
+from gtts import gTTS
+
+import pandas as pd
+from sentence_transformers import SentenceTransformer, util
+
+from fastapi import FastAPI, UploadFile, File, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from gtts import gTTS
-from PIL import Image
-
-import torchvision.transforms as transforms
-from torchvision.models import efficientnet_b0, EfficientNet_B0_Weights
-
-import torch
-import torch.nn as nn
-import pandas as pd
-
-import uuid
-import os
-import io
-import re
-
-from sentence_transformers import SentenceTransformer, util
-
-# =================== 기본 설정 ===================
-app = FastAPI()
-
-# ✅ 운영에서는 allow_origins를 Netlify 도메인으로 좁히는 걸 추천
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["https://sosaii.netlify.app"], 
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"]
+# =========================================================
+# 0) 기본 설정 / 로깅
+# =========================================================
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
 )
+log = logging.getLogger("sosai-backend")
 
-BASE_DIR = os.path.dirname(__file__)
+app = FastAPI(title="SOSAI Backend", version="1.0.0")
 
-# 정적 파일 저장 폴더 설정 (mp3 저장)
-STATIC_DIR = os.path.join(BASE_DIR, "static")
+# =========================================================
+# 1) 환경변수 (배포 친화)
+# =========================================================
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# CORS: 운영에서는 도메인으로 제한 권장
+ALLOW_ORIGINS = os.getenv("ALLOW_ORIGINS", "https://sosaii.netlify.app").split(",")
+
+# 정적 파일 (mp3 저장)
+STATIC_DIR = os.getenv("STATIC_DIR", os.path.join(BASE_DIR, "static"))
 os.makedirs(STATIC_DIR, exist_ok=True)
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
-# =================== 디바이스 ===================
-device = "cuda" if torch.cuda.is_available() else "cpu"
+# 모델/데이터 경로
+CLS_MODEL_PATH = os.getenv("CLS_MODEL_PATH", os.path.join(BASE_DIR, "best_model.pt"))
+QA_EMBED_PKL = os.getenv("QA_EMBED_PKL", os.path.join(BASE_DIR, "화상_질문_with_embedding.pkl"))
+QA_ANSWER_CSV = os.getenv("QA_ANSWER_CSV", os.path.join(BASE_DIR, "화상_답변.csv"))
 
-# =================================================
-# 1) 챗봇(SBERT) 로딩 (서버 시작 시 1회만)
-# =================================================
-MODEL_DIR = os.path.join(BASE_DIR, "models")
-Q_PKL_PATH = os.path.join(MODEL_DIR, "화상_질문_with_embedding.pkl")
-A_CSV_PATH = os.path.join(MODEL_DIR, "화상_답변.csv")
+# 분류 클래스 (프로젝트에 맞게 수정)
+# 예: ["1도", "2도", "3도"] 등
+CLASS_NAMES = os.getenv("CLASS_NAMES", "1도,2도,3도").split(",")
 
-text_model = None
-df_q = None
-df_a = None
+# 모델 디바이스
+DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
-def load_answer_csv(path: str) -> pd.DataFrame:
-    try:
-        return pd.read_csv(path, encoding="cp949")
-    except:
-        return pd.read_csv(path, encoding="utf-8")
-
-def preprocess(text: str) -> str:
-    return re.sub(r"[^\w\s]", "", text).strip().lower()
-
-def init_chatbot():
-    global text_model, df_q, df_a
-
-    # SBERT 모델 로드
-    text_model = SentenceTransformer("jhgan/ko-sroberta-multitask", device=device)
-
-    # 데이터 로드
-    df_q = pd.read_pickle(Q_PKL_PATH)
-    df_q["embedding"] = df_q["embedding"].apply(lambda x: torch.tensor(x).to(device))
-
-    df_a = load_answer_csv(A_CSV_PATH)
-
-    # 질환_의도 키 생성
-    for df in [df_q, df_a]:
-        df["fileName"] = df["fileName"].astype(str).str.strip().str.upper()
-        df["질환_의도"] = df["disease_name"].astype(str).str.strip() + "_" + df["intention"].astype(str).str.strip()
-
-    df_a["answer"] = df_a["answer"].fillna("")
-
-def find_best_conditions(user_input: str, top_k=3):
-    input_embedding = text_model.encode(preprocess(user_input), convert_to_tensor=True).to(device)
-    similarities = [util.cos_sim(qe, input_embedding).item() for qe in df_q["embedding"]]
-    top_indices = torch.topk(torch.tensor(similarities), top_k).indices.tolist()
-
-    result = [{
-        "question": df_q.iloc[idx]["question"],
-        "condition_key": df_q.iloc[idx]["질환_의도"],
-        "similarity": round(similarities[idx], 4)
-    } for idx in top_indices]
-
-    return result, input_embedding
-
-def get_best_answer(user_input: str):
-    user_input = (user_input or "").strip()
-    if not user_input:
-        return {"answer": "❌ 입력된 내용이 없어요.", "matches": [], "top_similar_questions": []}
-
-    similar_info, input_embedding = find_best_conditions(user_input)
-    condition_key = similar_info[0]["condition_key"]
-
-    answer_df = df_a[df_a["질환_의도"] == condition_key]
-    if answer_df.empty:
-        return {"answer": "❌ 해당 주제에 대한 답변이 없습니다.", "matches": similar_info, "top_similar_questions": similar_info}
-
-    priority_keywords = ['조치', '예방', '대응', '응급', '처치', '초기', '해결', '냉찜질', '물로 식히기', '연고', '병원']
-    filtered_df = answer_df[answer_df["answer"].str.contains("|".join(priority_keywords), na=False)]
-    target_df = filtered_df if not filtered_df.empty else answer_df
-
-    answer_texts = target_df["answer"].fillna("").tolist()
-    answer_embeddings = text_model.encode(answer_texts, convert_to_tensor=True).to(device)
-    sims = util.cos_sim(input_embedding, answer_embeddings)[0]
-    best_idx = torch.argmax(sims).item()
-
-    return {
-        "answer": answer_texts[best_idx].strip() + " 더 궁금한 점이 있으신가요?",
-        "matches": similar_info,
-        "top_similar_questions": similar_info
-    }
-
-# FastAPI 시작 시 챗봇 초기화
-@app.on_event("startup")
-def on_startup():
-    init_chatbot()
-    init_image_model()
-
-# =================================================
-# 2) 이미지 분류 모델 로딩 (서버 시작 시 1회만)
-# =================================================
-image_model = None
-
-def get_image_model(num_classes=3):
-    weights = EfficientNet_B0_Weights.DEFAULT
-    model = efficientnet_b0(weights=weights)
-    in_features = model.classifier[1].in_features
-    model.classifier[1] = nn.Linear(in_features, num_classes)
-    return model
-
-def init_image_model():
-    global image_model
-    image_model = get_image_model()
-    model_path = os.path.join(BASE_DIR, "best_model.pt")
-    image_model.load_state_dict(torch.load(model_path, map_location=device))
-    image_model.eval().to(device)
-
-def run_image_predict(image: Image.Image) -> int:
-    transform = transforms.Compose([
+# =========================================================
+# 2) 미들웨어
+# =========================================================
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[o.strip() for o in ALLOW_ORIGINS if o.strip()],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+app.include_router(auth_router)
+app.include_router(medical_router)
+# =========================================================
+# 3) 전처리 / 유틸
+# =========================================================
+img_transform = transforms.Compose(
+    [
         transforms.Resize((224, 224)),
         transforms.ToTensor(),
-        transforms.Normalize([0.485, 0.456, 0.406],
-                             [0.229, 0.224, 0.225])
-    ])
-    tensor = transform(image).unsqueeze(0).to(device)
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    ]
+)
 
-    with torch.no_grad():
-        output = image_model(tensor)
-        _, predicted = torch.max(output, 1)
+def _safe_filename(ext: str) -> str:
+    return f"{uuid.uuid4().hex}.{ext.lstrip('.')}"
 
-    return int(predicted.item())
 
-# =================================================
-# 3) API
-# =================================================
-@app.post("/dialog")
-async def dialog(request: Request):
-    data = await request.json()
-    keyword = data.get("keyword", "")
+def _normalize_text(s: str) -> str:
+    s = (s or "").strip()
+    s = re.sub(r"\s+", " ", s)
+    return s
 
-    result = get_best_answer(keyword)
-    response_text = result.get("answer", "❌ 응답을 만들지 못했어요.")
-    top_questions = result.get("top_similar_questions", [])
 
-    # TTS mp3 생성
-    filename = f"{uuid.uuid4()}.mp3"
-    filepath = os.path.join(STATIC_DIR, filename)
-    gTTS(text=response_text, lang="ko").save(filepath)
+# =========================================================
+# 4) Lazy Load (서버 부팅/재시작 안정화)
+# =========================================================
+# 분류 모델 캐시
+_cls_model: Optional[nn.Module] = None
 
-    return JSONResponse({
-        "text": response_text,
-        "audio_url": f"/static/{filename}",
-        "top_similar_questions": top_questions
-    })
+# SBERT/임베딩 캐시
+_sbert: Optional[SentenceTransformer] = None
+_q_embed: Optional[torch.Tensor] = None
+_answers_df: Optional[pd.DataFrame] = None
 
-@app.post("/predict-image")
-async def predict_image_api(file: UploadFile = File(...)):
-    try:
-        contents = await file.read()
-        try:
-            image = Image.open(io.BytesIO(contents)).convert("RGB")
-        except Exception as e:
-            return JSONResponse({"error": f"이미지를 열 수 없습니다: {e}"}, status_code=400)
 
-        pred = run_image_predict(image)
+def get_cls_model() -> nn.Module:
+    global _cls_model
+    if _cls_model is not None:
+        return _cls_model
 
-        return JSONResponse({
-            "prediction": pred,
-            "text": "응급 이미지 예측 결과입니다.",
-            "audio_url": None,
-            "top_similar_questions": []
-        })
-    except Exception as e:
-        return JSONResponse({"error": f"서버 내부 오류: {e}"}, status_code=500)
+    if not os.path.exists(CLS_MODEL_PATH):
+        raise FileNotFoundError(f"Classification model not found: {CLS_MODEL_PATH}")
 
+    log.info(f"[CLS] Loading EfficientNet-B0 on {DEVICE} ...")
+    model = efficientnet_b0(weights=EfficientNet_B0_Weights.DEFAULT)
+
+    # 마지막 레이어를 클래스 수에 맞게 교체
+    in_features = model.classifier[1].in_features
+    model.classifier[1] = nn.Linear(in_features, len(CLASS_NAMES))
+
+    # 체크포인트 로드
+    ckpt = torch.load(CLS_MODEL_PATH, map_location=DEVICE)
+
+    # state_dict 형태/전체모델 저장 형태 모두 대응
+    if isinstance(ckpt, dict) and "state_dict" in ckpt:
+        state = ckpt["state_dict"]
+    else:
+        state = ckpt
+
+    # DataParallel 저장 등으로 "module." prefix 있을 수 있음
+    cleaned = {}
+    for k, v in state.items():
+        nk = k.replace("module.", "")
+        cleaned[nk] = v
+
+    model.load_state_dict(cleaned, strict=False)
+    model.to(DEVICE)
+    model.eval()
+
+    _cls_model = model
+    log.info("[CLS] Model loaded.")
+    return _cls_model
+
+
+def get_qna_assets() -> tuple[SentenceTransformer, torch.Tensor, pd.DataFrame]:
+    global _sbert, _q_embed, _answers_df
+
+    if _sbert is None:
+        log.info("[QNA] Loading SentenceTransformer ...")
+        _sbert = SentenceTransformer("jhgan/ko-sroberta-multitask", device=DEVICE)
+
+    if _answers_df is None:
+        if not os.path.exists(QA_ANSWER_CSV):
+            raise FileNotFoundError(f"Answer CSV not found: {QA_ANSWER_CSV}")
+        _answers_df = pd.read_csv(QA_ANSWER_CSV, encoding="utf-8")
+
+    if _q_embed is None:
+        if not os.path.exists(QA_EMBED_PKL):
+            raise FileNotFoundError(f"Embedding PKL not found: {QA_EMBED_PKL}")
+        _q_embed = torch.load(QA_EMBED_PKL, map_location=DEVICE)
+        if isinstance(_q_embed, list):
+            _q_embed = torch.tensor(_q_embed, device=DEVICE)
+        if isinstance(_q_embed, torch.Tensor) and _q_embed.device.type != ("cuda" if DEVICE == "cuda" else "cpu"):
+            _q_embed = _q_embed.to(DEVICE)
+
+    return _sbert, _q_embed, _answers_df
+
+
+# =========================================================
+# 5) 라우트
+# =========================================================
 @app.get("/")
 def root():
-    return {"message": "🔥 SOSKIN FastAPI (챗봇+TTS+이미지예측) 서버가 실행 중입니다."}
+    return {"ok": True, "service": "SOSAI Backend", "device": DEVICE}
+
+
+@app.get("/health")
+def health():
+    # 모델까지 강제 로드하지는 않고, 파일 존재만 최소 체크
+    return {
+        "ok": True,
+        "device": DEVICE,
+        "cls_model_exists": os.path.exists(CLS_MODEL_PATH),
+        "qna_embed_exists": os.path.exists(QA_EMBED_PKL),
+        "qna_answer_exists": os.path.exists(QA_ANSWER_CSV),
+        "static_dir": STATIC_DIR,
+        "allow_origins": ALLOW_ORIGINS,
+    }
+
+
+@app.post("/predict-image")
+async def predict_image(file: UploadFile = File(...)):
+    t0 = time.time()
+    try:
+        model = get_cls_model()
+
+        raw = await file.read()
+        img = Image.open(io.BytesIO(raw)).convert("RGB")
+        x = img_transform(img).unsqueeze(0).to(DEVICE)
+
+        with torch.no_grad():
+            logits = model(x)
+            probs = torch.softmax(logits, dim=1)[0]
+
+        # top-k
+        k = min(3, probs.numel())
+        top_probs, top_idx = torch.topk(probs, k=k)
+
+        topk = []
+        for p, idx in zip(top_probs.tolist(), top_idx.tolist()):
+            topk.append(
+                {
+                    "label": CLASS_NAMES[idx] if idx < len(CLASS_NAMES) else str(idx),
+                    "confidence": float(p),
+                    "index": int(idx),
+                }
+            )
+
+        best = topk[0]
+        return {
+            "ok": True,
+            "result": best,
+            "topk": topk,
+            "elapsed_ms": int((time.time() - t0) * 1000),
+        }
+
+    except FileNotFoundError as e:
+        return JSONResponse(status_code=503, content={"ok": False, "error": str(e)})
+    except Exception as e:
+        log.exception("predict_image failed")
+        return JSONResponse(status_code=500, content={"ok": False, "error": str(e)})
+
+
+@app.post("/answer")
+async def answer(req: Request):
+    """
+    요청 예시(JSON):
+    {
+      "question": "물집이 생겼어요. 어떻게 해야하나요?",
+      "top_k": 1
+    }
+    """
+    t0 = time.time()
+    try:
+        body = await req.json()
+        question = _normalize_text(body.get("question", ""))
+        top_k = int(body.get("top_k", 1))
+
+        if not question:
+            return JSONResponse(status_code=400, content={"ok": False, "error": "question is required"})
+
+        sbert, q_embed, answers_df = get_qna_assets()
+
+        q_vec = sbert.encode(question, convert_to_tensor=True, device=DEVICE)
+        sims = util.cos_sim(q_vec, q_embed)[0]  # (N,)
+
+        k = max(1, min(top_k, sims.numel()))
+        top_scores, top_indices = torch.topk(sims, k=k)
+
+        results = []
+        for score, idx in zip(top_scores.tolist(), top_indices.tolist()):
+            row = answers_df.iloc[int(idx)] if int(idx) < len(answers_df) else None
+            ans = ""
+            if row is not None:
+                # CSV 컬럼명이 다를 수 있어서 안전하게 처리
+                if "answer" in answers_df.columns:
+                    ans = str(row["answer"])
+                elif "답변" in answers_df.columns:
+                    ans = str(row["답변"])
+                else:
+                    # 첫 번째 컬럼을 답변으로 간주 (fallback)
+                    ans = str(row.iloc[0])
+
+            results.append(
+                {
+                    "index": int(idx),
+                    "score": float(score),
+                    "answer": ans,
+                }
+            )
+
+        return {
+            "ok": True,
+            "question": question,
+            "results": results,
+            "best_answer": results[0]["answer"] if results else "",
+            "elapsed_ms": int((time.time() - t0) * 1000),
+        }
+
+    except FileNotFoundError as e:
+        return JSONResponse(status_code=503, content={"ok": False, "error": str(e)})
+    except Exception as e:
+        log.exception("answer failed")
+        return JSONResponse(status_code=500, content={"ok": False, "error": str(e)})
+
+
+@app.post("/tts")
+async def tts(req: Request):
+    """
+    요청 예시(JSON):
+    {
+      "text": "안녕하세요. 응급 처치 안내를 시작합니다.",
+      "lang": "ko"
+    }
+    응답:
+    {
+      "ok": true,
+      "url": "/static/xxxx.mp3"
+    }
+    """
+    try:
+        body = await req.json()
+        text = _normalize_text(body.get("text", ""))
+        lang = (body.get("lang") or "ko").strip()
+
+        if not text:
+            return JSONResponse(status_code=400, content={"ok": False, "error": "text is required"})
+
+        fname = _safe_filename("mp3")
+        out_path = os.path.join(STATIC_DIR, fname)
+
+        tts_obj = gTTS(text=text, lang=lang)
+        tts_obj.save(out_path)
+
+        return {"ok": True, "url": f"/static/{fname}"}
+
+    except Exception as e:
+        log.exception("tts failed")
+        return JSONResponse(status_code=500, content={"ok": False, "error": str(e)})
+
+
+# =========================================================
+# 6) 로컬 실행용 (EC2에서는 보통 uvicorn으로 실행)
+# =========================================================
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run("main:app", host="0.0.0.0", port=int(os.getenv("PORT", "8000")), reload=False)
