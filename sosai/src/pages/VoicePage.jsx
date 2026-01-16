@@ -15,7 +15,8 @@ export default function VoicePage() {
   const [selectedImage, setSelectedImage] = useState(null);
   const [prediction, setPrediction] = useState("");
 
-  const BASE_URL = "http://localhost:8000";
+  const BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:8000";
+
   const predictionLabel = {
     0: "1도 화상",
     1: "2도 화상",
