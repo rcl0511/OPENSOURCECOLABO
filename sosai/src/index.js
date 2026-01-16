@@ -14,6 +14,6 @@ root.render(
 );
 
 // 아래 한 줄 추가! (기존엔 unregister 였음)
-serviceWorkerRegistration.register();
+serviceWorkerRegistration.unregister();
 
 reportWebVitals();
