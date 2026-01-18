@@ -297,7 +297,7 @@ export default function Medical() {
                 {form.medical_history ? (
                   form.medical_history
                 ) : (
-                  <Null text="없음" />
+                  <Null text="미입력" />
                 )}
               </div>
               <div>
@@ -305,23 +305,23 @@ export default function Medical() {
                 {form.surgery_history ? (
                   form.surgery_history
                 ) : (
-                  <Null text="없음" />
+                  <Null text="미입력" />
                 )}
               </div>
               <div>
                 <b>복용약:</b>{" "}
-                {form.medications ? form.medications : <Null text="없음" />}
+                {form.medications ? form.medications : <Null text="미입력" />}
               </div>
               <div>
                 <b>알레르기:</b>{" "}
-                {form.allergies ? form.allergies : <Null text="없음" />}
+                {form.allergies ? form.allergies : <Null text="미입력" />}
               </div>
               <div>
                 <b>응급연락망:</b>{" "}
                 {form.emergency_contacts ? (
                   form.emergency_contacts
                 ) : (
-                  <Null text="없음" />
+                  <Null text="미입력" />
                 )}
               </div>
 

@@ -1,218 +1,340 @@
-.voice-bg {
-  padding: 100px;
-  font-family: 'Segoe UI', sans-serif;
-  background-color: #f8f9fa;
+/* VoicePage.css (FULL) 
+   - 배경: 이전 그라데이션 유지
+   - 카드형(guide/result/response/input row) 전부 제거
+   - 버튼형: "음성인식", "텍스트로 요청하기"만 유지
+   - 전송: 종이비행기 아이콘 버튼(CSS SVG)
+*/
+
+:root{
+  --text:#121826;
+  --muted:#5b6473;
+
+  --primary:#2c6eff;
+  --brand:#ff2c2c;
+  --navy:#305078;
+
+  --stroke: rgba(15,23,42,0.12);
+}
+
+/* ===== Page Base ===== */
+.voice-bg{
   min-height: 100vh;
   box-sizing: border-box;
-    padding-bottom: 100px;
-}
-
-.voice-header {
-  font-size: 30px;
-  font-weight: bold;
-  color: #ff2c2c;
-  text-align: center;
-  margin-bottom: 24px;
-}
-
-.voice-mic {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  margin-bottom: 16px;
+
+  padding: 56px 18px 110px;
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  color: var(--text);
+
+  /* ✅ 배경: 네가 좋다고 한 버전 */
+  background:
+    radial-gradient(1200px 500px at 50% -10%, rgba(44,110,255,0.18), transparent 55%),
+    radial-gradient(900px 420px at 15% 15%, rgba(255,44,44,0.14), transparent 55%),
+    radial-gradient(900px 420px at 85% 35%, rgba(48,80,120,0.10), transparent 55%),
+    linear-gradient(180deg, #f7f8fc, #eef3ff);
 }
 
-.voice-guide {
+/* ✅ 혹시 이전에 카드 백플레이트(voice-bg::before) 썼다면 강제 제거 */
+.voice-bg::before{
+  content: none !important;
+}
+
+/* ===== Layout width ===== */
+.voice-header,
+.voice-mic,
+.voice-guide,
+.voice-btn-group,
+.text-input-row,
+.voice-result,
+.voice-response{
+  width: min(720px, 100%);
+}
+
+/* ===== Header ===== */
+.voice-header{
   text-align: center;
-  font-size: 18px;
-  margin-bottom: 24px;
-  color: #333;
+  margin: 8px 0 18px;
+  font-size: clamp(22px, 3vw, 34px);
+  font-weight: 850;
+  letter-spacing: -0.6px;
+  color: var(--text);
 }
 
-.voice-btn-group {
+.voice-header::after{
+  content:"";
+  display:block;
+  width: 72px;
+  height: 4px;
+  margin: 10px auto 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--primary), var(--brand));
+  opacity: 0.9;
+}
+
+/* ===== Mic ===== */
+.voice-mic{
+  display: grid;
+  place-items: center;
+  margin: 10px 0 16px;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* ✅ 카드처럼 보이지 않게(배경/그림자 제거), 은은한 링만 */
+.voice-mic-icon{
+  width: 76px;
+  height: 76px;
+  padding: 14px;
+  border-radius: 999px;
+
+  background: transparent;
+  border: 1px solid var(--stroke);
+
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.voice-mic:hover .voice-mic-icon{
+  transform: translateY(-2px);
+  border-color: rgba(44,110,255,0.45);
+}
+
+/* listening 애니메이션: 은은한 링 + 펄스 */
+.voice-mic-icon.is-listening{
+  border-color: rgba(44,110,255,0.55);
+  box-shadow:
+    0 0 0 6px rgba(44,110,255,0.10),
+    0 0 0 12px rgba(44,110,255,0.06);
+  animation: micPulse 1.25s ease-in-out infinite;
+}
+
+@keyframes micPulse{
+  0%{ transform: scale(1); }
+  50%{ transform: scale(1.05); }
+  100%{ transform: scale(1); }
+}
+
+/* ===== Guide (카드 제거) ===== */
+.voice-guide{
+  text-align: center;
+  margin: 8px 0 16px;
+
+  padding: 0;                 /* ✅ 카드 패딩 제거 */
+  background: transparent;    /* ✅ 카드 배경 제거 */
+  border: none;               /* ✅ 테두리 제거 */
+  box-shadow: none;           /* ✅ 그림자 제거 */
+  backdrop-filter: none;      /* ✅ 블러 제거 */
+
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+.voice-guide b{
+  color: var(--text);
+  font-weight: 800;
+}
+
+/* ===== Buttons (이 2개만 버튼 스타일 유지) ===== */
+.voice-btn-group{
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
   gap: 12px;
-  margin-bottom: 20px;
+  margin: 10px 0 18px;
 }
 
-.voice-btn {
-  padding: 14px 28px;
-  font-size: 17px;
-  border-radius: 8px;
-  border: none;
+.voice-btn{
+  min-width: 180px;
+  padding: 13px 22px;
+  font-size: 16px;
+  font-weight: 800;
+  border-radius: 14px;
   cursor: pointer;
-  background-color: #305078;
-  color: white;
-  transition: 0.3s;
+  border: 1px solid transparent;
+
+  transition: transform .15s ease, opacity .15s ease, box-shadow .15s ease, background .15s ease, border-color .15s ease;
 }
 
-.voice-btn.main {
-  background-color: #305078;
-  color: white;
+.voice-btn:active{ transform: translateY(1px); }
+
+.voice-btn.main{
+  background: linear-gradient(135deg, rgba(44,110,255,1), rgba(48,80,120,1));
+  color: #fff;
+  box-shadow: 0 10px 26px rgba(44,110,255,0.18);
 }
 
-.voice-btn.main:disabled {
-  background-color: #bbb;
+.voice-btn.main:hover{
+  opacity: 0.96;
+}
+
+.voice-btn.main:disabled{
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.voice-btn.outline{
+  background: transparent;
+  color: var(--primary);
+  border-color: rgba(44,110,255,0.45);
+}
+
+.voice-btn.outline:hover{
+  background: rgba(44,110,255,0.06);
+}
+
+.voice-btn.outline:disabled{
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
-.voice-btn.outline {
-  background-color: white;
-  color: #2C6EFF;
-  border: 2px solid #2C6EFF;
-}
-
-.voice-btn.outline:disabled {
-  color: #aaa;
-  border-color: #aaa;
-  cursor: not-allowed;
-}
-
-.text-input-row {
+/* ===== Text input row (카드 제거 + 라인형) ===== */
+.text-input-row{
   display: flex;
-  justify-content: center;
   align-items: center;
-  margin-top: 16px;
-}
+  gap: 8px;
+  margin-top: 8px;
 
-.text-input-field {
-  padding: 12px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  width: 60%;
-  margin-right: 12px;
-}
-
-.text-submit-btn {
-  padding: 12px 20px;
-  font-size: 16px;
-  background-color: #2C6EFF;
-  color: white;
+  padding: 0;
+  background: transparent;
   border: none;
-  border-radius: 8px;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.text-input-field{
+  flex: 1;
+  min-width: 0;
+
+  padding: 12px 12px;
+  font-size: 15px;
+
+  border-radius: 10px;
+  border: 1px solid rgba(15,23,42,0.18);
+  background: #fff;
+  outline: none;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.text-input-field:focus{
+  border-color: rgba(44,110,255,0.55);
+  box-shadow: 0 0 0 4px rgba(44,110,255,0.12);
+}
+
+/* ✅ 전송 버튼: 종이비행기 아이콘 버튼 */
+.text-submit-btn{
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: none;
   cursor: pointer;
+
+  background-color: transparent;
+  border-radius: 999px;
+
+  /* ✈️ 종이비행기 SVG (stroke 색상 = #2c6eff) */
+  background-image: url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232c6eff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>\
+<line x1='22' y1='2' x2='11' y2='13'/>\
+<polygon points='22 2 15 22 11 13 2 9 22 2'/>\
+</svg>");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 22px 22px;
+
+  transition: background-color .15s ease, transform .15s ease;
 }
 
-.voice-result {
+.text-submit-btn:hover{
+  background-color: rgba(44,110,255,0.08);
+}
+
+.text-submit-btn:active{
+  transform: scale(0.92);
+}
+
+/* ===== Result / Response (카드 제거) ===== */
+.voice-result{
+  margin-top: 14px;
   text-align: center;
-  font-size: 18px;
-  margin-top: 24px;
-  color: #444;
+
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+
+  color: var(--muted);
+  font-size: 15px;
 }
 
-.voice-response img {
+.voice-result b{
+  color: var(--text);
+  font-weight: 900;
+}
+
+.voice-response{
+  margin-top: 14px;
+
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  backdrop-filter: none;
+
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.voice-response b{
+  font-weight: 900;
+}
+
+/* audio */
+audio{
   display: block;
-  margin: 0 auto;
-  max-width: 220px;
+  margin: 12px auto 0;
+  width: 100%;
+  max-width: 560px;
+}
+
+/* response 안 이미지 */
+.voice-response img{
+  display: block;
+  margin: 10px auto 16px;
+  max-width: 240px;
   width: 100%;
   height: auto;
   border-radius: 12px;
-  margin-top: 0px;
-  margin-bottom: 24px;  /* ✅ 아래쪽 간격 확보 */
 }
 
+/* ===== Responsive ===== */
+@media (max-width: 520px){
+  .voice-bg{
+    padding: 44px 14px 110px;
+  }
 
-.prediction-result {
-  margin-top: 12px;
-  font-weight: bold;
-  font-size: 18px;
-  color: #305078;
+  .voice-btn{
+    width: 100%;
+    min-width: 0;
+  }
+
+  .text-input-row{
+    flex-direction: row;   /* ✅ 아이콘 버튼이니까 한 줄 유지가 예쁨 */
+    align-items: center;
+  }
 }
 
-
-.similar-question-list {
-  margin-top: 12px;
-  font-size: 15px;
-  padding-left: 20px;
-  color: #666;
-}
-
-.similar-question-list li {
-  margin-bottom: 4px;
-}
-
-.upload-btn-group {
-  margin-top: 24px;
-  text-align: center;
-}
-
-.upload-btn-group label {
-  margin: 0 8px;
-}
-
-.image-preview {
-  display: flex;
-  justify-content: center;
-  margin-top: 24px;
-}
-
-.image-preview img {
-  width: 100%;
-  max-width: 300px;
-  border-radius: 12px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
-}
-
-
-audio {
-  display: block;
-  margin: 16px auto 0 auto;
-  width: 100%;
-  max-width: 500px;
-}
-.prediction-result {
-  margin-top: 12px;
-  font-weight: bold;
-  font-size: 18px;
-  color: #305078;
-  background-color: #fff;   /* 글씨 배경 흰색 추가 */
-  padding: 12px;             /* 내부 여백 */
-  border-radius: 8px;        /* 둥글게 */
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.05); /* 살짝 그림자 */
-  position: relative;        /* z-index 적용 가능하게 설정 */
-  z-index: 10;               /* 다른 요소보다 위로 */
-}
-.solution-text {
-  margin-top: 12px;
-  font-size: 16px;
-  color: #333;
-  background-color: #f1f1f1;
-  padding: 14px;
-  border-radius: 8px;
-  white-space: pre-wrap;   /* 줄바꿈 반영되도록 */
-  line-height: 1.6;
-}
-
-
-
-.result-section {
-  display: flex;
-  flex-direction: row; /* 사진과 예측 결과를 가로 배치 */
-  align-items: flex-start;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 24px;
-  margin-top: 24px;
-}
-
-.result-section .image-preview img {
-  width: 100%;
-  max-width: 300px;
-  border-radius: 12px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
-}
-
-.result-section .prediction-result {
-  max-width: 500px;
-  min-height: 320px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  background-color: #fff;
-  padding: 16px;
-  border-radius: 8px;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
+/* Reduce motion */
+@media (prefers-reduced-motion: reduce){
+  .voice-mic-icon,
+  .voice-btn,
+  .text-submit-btn{
+    transition: none !important;
+  }
+  .voice-mic-icon.is-listening{
+    animation: none !important;
+    box-shadow: none !important;
+  }
 }

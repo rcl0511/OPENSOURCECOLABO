@@ -1,74 +1,150 @@
+/* SignupPage.css */
+
+/* 전체 배경 */
 .signup-bg {
-  background: #fff;
+  background: #ffffff;
   min-height: 100vh;
-  width: 100vw;
+  width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
 }
+
+/* 카드 */
 .signup-card {
-  background: #fff;
   width: 100%;
   max-width: 411px;
   box-sizing: border-box;
-  padding-bottom: 60px;
+  background: #ffffff;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.08);
 }
+
+/* 헤더(지금 JSX에는 없지만, 나중에 넣어도 되게 유지) */
 .signup-header {
-  background: #2C6EFF;
+  background: #2c6eff;
   height: 170px;
   border-radius: 0 0 56px 56px;
-  box-shadow: 0px 4px 4px 0px rgba(0,0,0,0.25);
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.12);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
 }
+
+/* 제목 (JSX에 h2.signup-title 있음) */
 .signup-title {
-  color: #fff;
-  font-size: 38px;
-  margin-bottom: 10px;
-  font-family: 'ABeeZee', 'Helvetica', Arial, sans-serif;
+  font-size: 32px;
+  font-weight: 800;
+  margin: 0;
+  color: #2c6eff;
+  text-align: center;
+  padding-top: 28px;
+  font-family: "ABeeZee", "Helvetica", Arial, sans-serif;
 }
-.signup-subtitle {
-  color: #fff;
-  font-size: 16px;
-  font-family: 'Poppins', 'Helvetica', Arial, sans-serif;
-  margin-top: 0;
-}
+
+/* 폼 */
 .signup-form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 35px 36px 0 36px;
+  gap: 14px;
+  padding: 22px 28px 28px 28px;
 }
-.signup-input {
+
+/* label + input 정리 */
+.signup-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2a44;
+  font-family: "Poppins", "Helvetica", Arial, sans-serif;
+}
+
+/* JSX에서 input에 className 안 줬으니 label 안의 input을 타겟팅 */
+.signup-form input {
   padding: 14px 12px;
-  font-size: 17px;
-  border-radius: 8px;
+  font-size: 16px;
+  border-radius: 10px;
   border: 1.5px solid #d7e2ff;
   outline: none;
-  margin-bottom: 0;
   background: #f6f9ff;
-  font-family: 'Poppins', 'Helvetica', Arial, sans-serif;
+  transition: border 0.15s, box-shadow 0.15s, background 0.15s;
+  font-family: "Poppins", "Helvetica", Arial, sans-serif;
 }
+
+.signup-form input:focus {
+  border-color: #2c6eff;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(44, 110, 255, 0.14);
+}
+
+/* 버튼 공통 */
 .signup-btn {
   padding: 14px 0;
-  font-size: 20px;
-  font-weight: 600;
-  border-radius: 8px;
+  font-size: 18px;
+  font-weight: 700;
+  border-radius: 10px;
   border: none;
   cursor: pointer;
   width: 100%;
   margin-top: 6px;
-  transition: background 0.15s, color 0.15s, border 0.15s;
+  transition: transform 0.06s, background 0.15s, color 0.15s, border 0.15s,
+    opacity 0.15s;
 }
-.signup-btn.main {
-  background: #2C6EFF;
-  color: #fff;
+
+/* 기본 버튼 = 가입하기 (JSX는 className="signup-btn") */
+.signup-btn {
+  background: #2c6eff;
+  color: #ffffff;
 }
-.signup-btn.sub {
-  background: #fff;
-  color: #2C6EFF;
-  border: 2px solid #2C6EFF;
+
+.signup-btn:hover {
+  opacity: 0.95;
+}
+
+.signup-btn:active {
+  transform: scale(0.99);
+}
+
+/* outline 버튼 = 돌아가기 (JSX는 className="signup-btn outline") */
+.signup-btn.outline {
+  background: #ffffff;
+  color: #2c6eff;
+  border: 2px solid #2c6eff;
   margin-top: 0;
+}
+
+.signup-btn.outline:hover {
+  background: rgba(44, 110, 255, 0.06);
+}
+
+/* disabled */
+.signup-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* 에러 메시지(인라인 스타일 쓰고 있지만, 혹시 클래스 쓰고 싶으면) */
+.signup-error {
+  margin-top: 10px;
+  color: crimson;
+  font-size: 13px;
+}
+
+/* 모바일 여백 */
+@media (max-width: 420px) {
+  .signup-card {
+    max-width: 92vw;
+  }
+  .signup-form {
+    padding: 18px 18px 22px 18px;
+  }
+  .signup-title {
+    font-size: 28px;
+    padding-top: 22px;
+  }
 }

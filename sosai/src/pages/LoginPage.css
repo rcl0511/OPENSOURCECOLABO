@@ -1,83 +1,234 @@
-.login-bg {
-  background: #fff;
-  min-height: 100vh;
-  width: 100vw;
-  display: flex;
-  flex-direction: column;
+/* =========================
+   LoginPage.css (Blue Concept / Portfolio)
+   - 파란 컨셉 유지 (레드/보라 제거)
+   - 화려하지만 깔끔한 포트폴리오 톤
+   - 어르신도 쉽게: 큰 글씨/큰 버튼/세로 버튼/명확한 대비
+   - JSX 변경 없이 CSS만
+========================= */
+
+:root{
+  /* ✅ Blue palette only */
+  --blue-700:#1d4ed8;
+  --blue-600:#2563eb;
+  --blue-500:#2c6eff;   /* 기존 primary */
+  --blue-400:#60a5fa;
+  --blue-200:#bfdbfe;
+
+  --text:#0b1220;
+  --muted:#475569;
+
+  --glass: rgba(255,255,255,0.58);
+  --glass-strong: rgba(255,255,255,0.74);
+  --stroke: rgba(255,255,255,0.22);
+  --stroke-dark: rgba(15,23,42,0.12);
+
+  --shadow-lg: 0 22px 75px rgba(15, 23, 42, 0.16);
+  --shadow-md: 0 14px 42px rgba(15, 23, 42, 0.12);
 }
 
-.login-card {
+/* ===== 전체 배경: Blue glow only ===== */
+.login-bg{
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  color: var(--text);
+
+  background:
+    radial-gradient(1200px 520px at 50% -10%, rgba(44,110,255,0.28), transparent 55%),
+    radial-gradient(980px 520px at 18% 18%, rgba(96,165,250,0.22), transparent 60%),
+    radial-gradient(980px 520px at 82% 38%, rgba(191,219,254,0.22), transparent 62%),
+    linear-gradient(180deg, #f7f9ff, #eef5ff);
+}
+
+.login-card{
   flex: 1;
   display: flex;
   flex-direction: column;
 }
 
-.login-header {
-  background: #2C6EFF;
-  height: 400px;
+/* ===== Hero: glass + blue glow ===== */
+.login-header{
+  height: 48vh;
+  min-height: 340px;
+
+  background: linear-gradient(180deg, rgba(255,255,255,0.64), rgba(255,255,255,0.44));
+  backdrop-filter: blur(12px);
+
+  border-bottom: 1px solid rgba(255,255,255,0.40);
+  box-shadow: var(--shadow-md);
+
   border-radius: 0 0 48px 48px;
-  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+
+  padding: 26px 18px;
+
+  position: relative;
+  overflow: hidden;
 }
 
-.login-title {
-  color: #fff;
-  font-size: 100px;
-  font-family: 'ABeeZee', 'Helvetica', Arial, sans-serif;
-  letter-spacing: 1px;
+/* Blue decorative glow */
+.login-header::before{
+  content:"";
+  position: absolute;
+  inset: -50px;
+  background:
+    radial-gradient(520px 340px at 25% 30%, rgba(44,110,255,0.28), transparent 62%),
+    radial-gradient(520px 340px at 78% 42%, rgba(96,165,250,0.26), transparent 64%),
+    radial-gradient(520px 340px at 52% 10%, rgba(191,219,254,0.22), transparent 62%);
+  filter: blur(10px);
+  opacity: 0.95;
+  pointer-events: none;
+}
+
+.login-header::after{
+  content:"";
+  position: absolute;
+  left: 50%;
+  bottom: -46px;
+  transform: translateX(-50%);
+  width: 86%;
+  height: 90px;
+  background: radial-gradient(closest-side, rgba(44,110,255,0.22), transparent 70%);
+  filter: blur(12px);
+  pointer-events: none;
+}
+
+/* ===== Title: blue gradient text (readable + premium) ===== */
+.login-title{
+  position: relative;
   margin: 0;
+  font-family: "ABeeZee", "Helvetica", Arial, sans-serif;
+  font-weight: 900;
+  letter-spacing: 1px;
+
+  /* ✅ 크게 */
+  font-size: clamp(52px, 10vw, 86px);
+
+  background: linear-gradient(90deg, var(--blue-700), var(--blue-500), var(--blue-400));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+
+  text-shadow: 0 12px 34px rgba(44,110,255,0.18);
 }
 
-.login-subtitle {
-  color: #fff;
-  font-size: 50px;
-  font-family: 'Poppins', 'Helvetica', Arial, sans-serif;
-  margin-top: 10px;
+/* Subtitle: high contrast, bigger */
+.login-subtitle{
+  position: relative;
+  margin: 14px 0 0;
+  text-align: center;
+  line-height: 1.55;
+  font-weight: 700;
+
+  font-size: clamp(18px, 4.2vw, 26px);
+  color: rgba(15,23,42,0.78);
 }
 
-.login-btn-group {
+/* ===== Buttons area ===== */
+.login-btn-group{
   flex: 1;
   display: flex;
-  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  padding: 0 24px;
-  margin-top: 24px;
-  gap: 24px;
+
+  padding: 26px 18px 44px;
 }
 
-.login-btn-row {
+/* ✅ 세로 버튼: 쉬움 + 안정적 */
+.login-btn-row{
+  width: min(560px, 100%);
   display: flex;
-  width: 100%;
-  gap: 12px;
-  margin-top: 12px;
+  flex-direction: column;
+  gap: 16px;
 }
 
-.login-btn {
-  padding: 14px 0;
-  font-size: 30px;
-  font-weight: 600;
-  border-radius: 8px;
-  border: none;
+/* ===== Button base (big touch targets) ===== */
+.login-btn{
+  width: 100%;
+  padding: 18px 0;
+  font-size: clamp(20px, 4.6vw, 26px);
+  font-weight: 900;
+
+  border-radius: 18px;
+  border: 1px solid transparent;
   cursor: pointer;
-  width: 100%;
-  transition: background 0.2s, color 0.2s, border 0.2s;
+
+  transition: transform .12s ease, box-shadow .12s ease, filter .12s ease, background .12s ease, border-color .12s ease;
 }
 
-.login-btn.main {
-  background: #2C6EFF;
+/* Start button: blue premium gradient */
+.login-btn.sub{
   color: #fff;
+  background: linear-gradient(135deg, var(--blue-600), var(--blue-500));
+  box-shadow:
+    0 20px 60px rgba(37,99,235,0.28),
+    0 10px 26px rgba(44,110,255,0.18);
+  border-color: rgba(255,255,255,0.18);
 }
 
-.login-btn.sub {
-  background: #2C6EFF;
-  color: #fff;
+.login-btn.sub:hover{
+  transform: translateY(-2px);
+  filter: saturate(1.06);
+  box-shadow:
+    0 26px 78px rgba(37,99,235,0.32),
+    0 14px 34px rgba(44,110,255,0.20);
 }
 
-.login-btn.outline {
-  background: #fff;
-  color: #2C6EFF;
-  border: 2px solid #2C6EFF;
+.login-btn.sub:active{
+  transform: translateY(1px);
+}
+
+/* Signup button: glass outline (still blue) */
+.login-btn.sub.outline{
+  background: rgba(255,255,255,0.72);
+  backdrop-filter: blur(10px);
+
+  color: var(--blue-600);
+  border-color: rgba(37,99,235,0.32);
+  box-shadow: var(--shadow-md);
+}
+
+.login-btn.sub.outline:hover{
+  transform: translateY(-2px);
+  background: rgba(255,255,255,0.88);
+  border-color: rgba(37,99,235,0.48);
+}
+
+.login-btn.sub.outline:active{
+  transform: translateY(1px);
+}
+
+/* Accessibility focus ring */
+.login-btn:focus-visible{
+  outline: none;
+  box-shadow: 0 0 0 6px rgba(44,110,255,0.22), var(--shadow-md);
+}
+
+/* ===== Mobile ===== */
+@media (max-width: 480px){
+  .login-header{
+    height: 46vh;
+    min-height: 310px;
+    border-radius: 0 0 36px 36px;
+  }
+  .login-btn{
+    border-radius: 16px;
+  }
+}
+
+/* Reduce motion */
+@media (prefers-reduced-motion: reduce){
+  .login-btn{
+    transition: none !important;
+  }
+  .login-header::before,
+  .login-header::after{
+    filter: none !important;
+  }
 }

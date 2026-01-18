@@ -1,53 +1,145 @@
 /* src/pages/SettingsPage.css */
+
+/* ===== 전체 페이지 배경 (꽉 차게) ===== */
 .page-container {
-  max-width: 430px;
-  margin: 0 auto;
-  padding: 16px;
-  background: #f9faff;
+  width: 100%;
   min-height: 100vh;
+  margin: 0;
+  padding: 18px 16px 92px; /* 하단 NavBar 공간 */
+  box-sizing: border-box;
+  background: #f6f9ff;
 }
+
+/* 중앙 정렬 */
 .center {
   display: flex;
   flex-direction: column;
   align-items: center;
 }
+
+/* ===== 프로필 이미지 ===== */
 .profile-img {
   width: 92px;
   height: 92px;
-  border-radius: 100%;
+  border-radius: 50%;
   object-fit: cover;
+  background: #ffffff;
+
   border: 3px solid #bdd8fa;
-  margin: 0 auto 16px auto;
-  background: #fff;
-  box-shadow: 0 0 5px #bdd8fa33;
+  box-shadow: 0 8px 18px rgba(44, 110, 255, 0.15);
+
+  transition: transform 0.1s ease, box-shadow 0.18s ease;
 }
+
+.profile-img:active {
+  transform: scale(0.97);
+}
+
+/* ===== 설정 리스트 (카드 영역) ===== */
 .settings-list {
+  margin-top: 18px;
   display: flex;
   flex-direction: column;
-  gap: 25px;
-  margin-top: 18px;
+  gap: 10px;
+
+  padding: 14px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 10px 26px rgba(28, 52, 120, 0.08);
+  border: 1px solid rgba(44, 110, 255, 0.1);
+
+  align-items: center; /* ✅ 버튼 중앙 정렬 */
 }
+
+/* ===== 설정 버튼 ===== */
 .settings-btn {
-  background: #347afc;
-  color: #fff;
-  border-radius: 10px;
-  font-size: 1.06rem;
-  font-weight: 500;
-  padding: 14px 0;
-  border: none;
+  width: 100%;
+  max-width: 320px; /* ✅ 버튼 폭 제한 */
+
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1.5px solid rgba(44, 110, 255, 0.15);
+
+  background: #ffffff;
+  color: #1f2a44;
+
+  font-size: 0.95rem;
+  font-weight: 600;
+
   cursor: pointer;
-  text-align: center;
-  transition: background 0.17s;
-  box-shadow: 0 2px 7px #e3ecfb40;
+  text-align: left;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  box-shadow: 0 5px 12px rgba(44, 110, 255, 0.06);
+  transition: background 0.15s ease, box-shadow 0.15s ease,
+    transform 0.05s ease;
 }
+
+/* 오른쪽 화살표 */
+.settings-btn::after {
+  content: "›";
+  font-size: 20px;
+  opacity: 0.45;
+}
+
+/* Hover / Active */
 .settings-btn:hover {
-  background: #2655b8;
+  background: rgba(44, 110, 255, 0.05);
+  box-shadow: 0 8px 18px rgba(44, 110, 255, 0.1);
 }
+
+.settings-btn:active {
+  transform: scale(0.99);
+}
+
+/* ===== 로그아웃 버튼 ===== */
 .settings-btn.logout {
-  background: #fff;
+  background: #ffffff;
   color: #347afc;
-  border: 1.7px solid #347afc;
+  border: 1.5px solid #347afc;
+  box-shadow: 0 5px 14px rgba(52, 122, 252, 0.12);
 }
+
+.settings-btn.logout::after {
+  content: "";
+}
+
 .settings-btn.logout:hover {
   background: #f0f6ff;
+}
+
+/* ===== 모바일 대응 ===== */
+@media (max-width: 420px) {
+  .settings-btn {
+    max-width: 300px;
+    font-size: 0.93rem;
+    padding: 11px 13px;
+  }
+}
+
+/* =====================================================
+   ✅ "큰 흰 카드(상위 레이아웃)" 제거 - 안정형 (찢기 트릭 X)
+   - page-container를 감싸는 상위 wrapper가
+     max-width + white bg + radius + shadow를 갖고 있을 때만 무력화
+   - 최신 브라우저에서 동작 (:has 사용)
+===================================================== */
+
+/* 프로젝트에서 흔한 wrapper 클래스들 (있으면 자동으로 잡힘) */
+.layout-content:has(.page-container),
+.content-wrapper:has(.page-container),
+.main-content:has(.page-container),
+.container:has(.page-container),
+.wrapper:has(.page-container),
+.page-wrapper:has(.page-container),
+.app-content:has(.page-container) {
+  max-width: none !important;
+  margin: 0 !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  overflow: visible !important;
 }

@@ -1,71 +1,307 @@
-.medical-bg {
+/* =========================
+   MedicalPage.css (Premium / Brand: #305078)
+   - 기존 구조 그대로
+   - 더 고급스럽게: soft glass + subtle gradient + 정돈된 spacing
+   - 접근성: 폰트 크기/대비 유지 + 포커스 링 유지
+   - ✅ 보기모드 라벨/값 정렬(스샷처럼)
+========================= */
+
+:root{
+  /* Brand */
+  --brand:#305078;
+  --brand-700:#223b58;
+  --brand-600:#264363;    /* hover */
+  --brand-500:#305078;
+  --brand-100:#dbe6f5;
+  --brand-50:#eef3fb;
+
+  /* Neutral */
+  --text:#0f172a;
+  --muted:#64748b;
+  --border: rgba(15,23,42,0.10);
+  --border-strong: rgba(15,23,42,0.14);
+
+  /* Background */
+  --bg1:#f7f9ff;
+  --bg2:#eef3fb;
+
+  /* Surface */
+  --card: rgba(255,255,255,0.70);
+  --card-strong: rgba(255,255,255,0.86);
+
+  /* Radius / Shadow */
+  --radius-xl: 22px;
+  --radius-lg: 18px;
+  --radius-md: 12px;
+
+  --shadow-lg: 0 22px 70px rgba(15,23,42,0.14);
+  --shadow-md: 0 14px 40px rgba(15,23,42,0.10);
+  --shadow-sm: 0 8px 24px rgba(15,23,42,0.08);
+}
+
+/* ===== 전체 배경 (고급스러운 블루 글로우) ===== */
+.medical-bg{
   min-height: 100vh;
-  padding: 40px 24px;
-  background-color: #f5f7fa;
-  font-size: 20px;
+  padding: 52px 24px 72px;
   display: flex;
   flex-direction: column;
   align-items: center;
+
+  font-size: 18px;
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  color: var(--text);
+
+  background:
+    radial-gradient(1100px 520px at 50% -10%, rgba(48,80,120,0.22), transparent 55%),
+    radial-gradient(900px 520px at 15% 18%, rgba(48,80,120,0.12), transparent 60%),
+    radial-gradient(900px 520px at 85% 34%, rgba(48,80,120,0.10), transparent 60%),
+    linear-gradient(180deg, var(--bg1) 0%, var(--bg2) 60%, #ffffff 100%);
 }
 
-.medical-content {
+.medical-content{
   width: 100%;
-  max-width: 800px;
+  max-width: 860px;
 }
 
-.medical-title {
-  font-size: 36px;
-  font-weight: bold;
+/* ===== 타이틀 (정돈 + 포인트 라인) ===== */
+.medical-title{
+  font-size: clamp(28px, 3vw, 38px);
+  font-weight: 900;
   text-align: center;
-  margin-bottom: 32px;
+  margin-bottom: 26px;
+  color: var(--brand);
+  letter-spacing: -0.02em;
+  position: relative;
 }
 
-.medical-card {
-  background-color: #fff;
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  padding: 32px;
+.medical-title::after{
+  content:"";
+  display:block;
+  width: 92px;
+  height: 4px;
+  margin: 12px auto 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(48,80,120,1), rgba(48,80,120,0.35));
+  opacity: 0.95;
 }
 
-.medical-form label {
+/* ===== 카드 (glass 느낌 + 얇은 테두리 + 깊은 그림자) ===== */
+.medical-card{
+  background: linear-gradient(180deg, var(--card-strong), var(--card));
+  border-radius: var(--radius-xl);
+  padding: 34px;
+
+  border: 1px solid rgba(255,255,255,0.55);
+  outline: 1px solid rgba(15,23,42,0.08);
+
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(10px);
+
+  position: relative;
+  overflow: hidden;
+}
+
+/* 카드 내부 은은한 하이라이트 */
+.medical-card::before{
+  content:"";
+  position: absolute;
+  inset: -40px;
+  background:
+    radial-gradient(520px 240px at 25% 15%, rgba(48,80,120,0.12), transparent 60%),
+    radial-gradient(520px 240px at 80% 35%, rgba(48,80,120,0.08), transparent 62%);
+  filter: blur(10px);
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+/* ===== 폼 ===== */
+.medical-form label{
   display: block;
-  margin-bottom: 24px;
-  font-weight: bold;
-  font-size: 20px;
+  margin-bottom: 18px;
+  font-weight: 800;
+  font-size: 15px;
+  color: rgba(15,23,42,0.92);
+  letter-spacing: -0.01em;
 }
 
-.medical-form input {
+/* input: 더 고급스럽게(보더/그림자/포커스) */
+.medical-form input{
   display: block;
   margin-top: 10px;
-  padding: 14px;
-  font-size: 18px;
   width: 100%;
-  border: 1px solid #ccc;
-  border-radius: 8px;
   box-sizing: border-box;
+
+  padding: 14px 14px;
+  font-size: 16px;
+  color: var(--text);
+
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-strong);
+  background: rgba(255,255,255,0.92);
+
+  outline: none;
+  transition: border-color .15s ease, box-shadow .15s ease, transform .08s ease, background .15s ease;
 }
 
-.medical-btn {
-  background-color: #305078;
-  color: white;
-  font-size: 18px;
-  padding: 14px 24px;
+.medical-form input::placeholder{
+  color: rgba(100,116,139,0.85);
+}
+
+/* ✅ 브랜드 포커스 */
+.medical-form input:focus{
+  border-color: rgba(48,80,120,0.55);
+  box-shadow: 0 0 0 4px rgba(48,80,120,0.14);
+  background: #fff;
+}
+
+.medical-form input:active{
+  transform: translateY(1px);
+}
+
+/* ===== 버튼 (프리미엄 그라데이션 + 큰 터치) ===== */
+.medical-btn{
+  background: linear-gradient(135deg, rgba(48,80,120,1), rgba(34,59,88,1));
+  color: #fff;
+
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+
+  padding: 14px 18px;
   border: none;
-  border-radius: 8px;
+  border-radius: 14px;
   cursor: pointer;
+
+  box-shadow:
+    0 14px 34px rgba(48,80,120,0.22),
+    0 6px 16px rgba(15,23,42,0.10);
+
+  transition: transform .12s ease, filter .15s ease, box-shadow .15s ease, background .15s ease;
+  position: relative;
+  z-index: 1;
 }
 
-.medical-btn.outline {
-  background-color: white;
-  color: #305078;
-  border: 2px solid #305078;
+.medical-btn:hover{
+  filter: saturate(1.05) brightness(1.02);
+  box-shadow:
+    0 18px 48px rgba(48,80,120,0.26),
+    0 8px 20px rgba(15,23,42,0.12);
 }
 
-.medical-info {
-  font-size: 20px;
-  line-height: 1.8;
+.medical-btn:active{
+  transform: translateY(2px);
 }
 
-.medical-null {
-  color: #888;
+.medical-btn:focus-visible{
+  outline: none;
+  box-shadow: 0 0 0 5px rgba(48,80,120,0.18), var(--shadow-md);
+}
+
+/* outline 버튼 */
+.medical-btn.outline{
+  background: rgba(255,255,255,0.78);
+  color: var(--brand);
+  border: 1.5px solid rgba(48,80,120,0.35);
+  box-shadow: var(--shadow-sm);
+}
+
+.medical-btn.outline:hover{
+  background: rgba(238,243,251,0.9);
+  border-color: rgba(48,80,120,0.55);
+  box-shadow: var(--shadow-md);
+}
+
+/* ===== 정보 표시 ===== */
+.medical-info{
+  font-size: 18px;
+  line-height: 1.9;
+  color: rgba(15,23,42,0.88);
+  position: relative; /* 카드 before 위로 */
+  z-index: 1;
+  gap: 14px;
+}
+
+.medical-info b{
+  color: var(--brand);
+  font-weight: 900;
+}
+
+/* 미입력 pill */
+.medical-null{
+  display: inline-block;
+  color: rgba(71,85,105,0.9);
+  background: rgba(148,163,184,0.18);
+  border: 1px solid rgba(148,163,184,0.28);
+
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  margin-left: 8px;
+}
+
+/* ======================================================
+   ✅ 라벨/값 정렬 (스샷처럼 딱 맞추기)
+   - JSX는 <div><b>라벨:</b> 값</div> 구조라서
+     medical-info 안의 "각 줄 div"를 2열 grid로 만들면 됨
+====================================================== */
+.medical-info > div{
+  display: grid;
+  margin-bottom: 14px;
+  grid-template-columns: 150px 1fr; /* ✅ 여기만 조절하면 됨 (140~180 추천) */
+  column-gap: 14px;
+  align-items: center;
+}
+
+/* 라벨은 줄바꿈 없이 왼쪽 고정 */
+.medical-info > div > b{
+  white-space: nowrap;
+}
+
+/* 값/Null pill은 오른쪽 칼럼 */
+.medical-info > div > b + *{
+  justify-self: start;
+}
+
+/* ======================================================
+   ✅ "정보 수정하기" 버튼 줄 정렬 깨짐 방지
+   - 마지막에 버튼만 있는 div가 있다면(구조 바뀔 때 대비)
+====================================================== */
+.medical-info > button,
+.medical-info .medical-btn{
+  margin-top: 18px;
+}
+
+/* ===== 모바일 ===== */
+@media (max-width: 520px){
+  .medical-bg{
+    padding: 32px 16px 64px;
+  }
+
+  .medical-title{
+    margin-bottom: 18px;
+  }
+
+  .medical-card{
+    padding: 22px;
+    border-radius: 18px;
+  }
+
+  /* 모바일에서는 1열로 내려서 더 보기 편하게 */
+  .medical-info > div{
+    grid-template-columns: 1fr;
+    row-gap: 6px;
+    align-items: start;
+  }
+
+  .medical-info > div > b{
+    white-space: normal;
+  }
+}
+
+/* 모션 최소화 */
+@media (prefers-reduced-motion: reduce){
+  .medical-form input,
+  .medical-btn{
+    transition: none !important;
+  }
 }
