@@ -18,6 +18,7 @@ from jose import jwt, JWTError
 from routes_auth import router as auth_router
 from routes_medical import router as medical_router
 from database_mongo import medical_col
+from routes_medical import ensure_medical_indexes
 
 # =================== 기본 설정 / 로깅 ===================
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -181,7 +182,7 @@ async def generate_emergency_answer(user_question: str, medical_doc: Optional[Di
 (과도한 확신 금지, 위험 시 119 우선)
 """.strip()
 
-    # ✅ 1) 저장된 Prompt(pmpt_...)를 쓰는 경우
+    # 1) 저장된 Prompt(pmpt_...)를 쓰는 경우
     if OPENAI_PROMPT_ID:
         resp = client.responses.create(
             prompt={"id": OPENAI_PROMPT_ID, "version": str(OPENAI_PROMPT_VERSION)},
@@ -191,7 +192,7 @@ async def generate_emergency_answer(user_question: str, medical_doc: Optional[Di
         out_text = getattr(resp, "output_text", None)
         return (out_text or "").strip() if out_text else "답변 생성에 실패했습니다."
 
-    # ✅ 2) Prompt ID 없으면 model + system/user로 호출
+    # 2) Prompt ID 없으면 model + system/user로 호출
     resp = client.responses.create(
         model=OPENAI_MODEL,
         input=[
@@ -229,8 +230,8 @@ async def dialog(body: Dict[str, Any] = Body(...), request: Request = None):
     프론트 호환:
       요청: { "keyword": "..." }
       응답: { ok, answer, audio_url(optional), elapsed_ms }
-    ✅ 로그인 토큰이 있으면 개인화(의료 프로필 반영)
-    ✅ 토큰이 없어도 일반 응급 가이드로 답변
+    로그인 토큰이 있으면 개인화(의료 프로필 반영)
+    토큰이 없어도 일반 응급 가이드로 답변
     """
     t0 = time.time()
     try:
@@ -265,6 +266,11 @@ async def dialog(body: Dict[str, Any] = Body(...), request: Request = None):
     except Exception as e:
         log.exception("dialog failed")
         return JSONResponse(status_code=500, content={"ok": False, "error": str(e)})
+    
+
+@app.on_event("startup")
+async def _startup():
+    await ensure_medical_indexes()
 
 @app.post("/tts")
 async def tts(body: Dict[str, Any] = Body(...)):

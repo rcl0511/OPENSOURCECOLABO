@@ -21,8 +21,6 @@ export default function VoicePage() {
 
   const audioRef = useRef(null);
 
-  // ✅ 운영에서는 반드시 HTTPS BASE URL을 넣어야 Mixed Content 안 막힘
-  // 예: REACT_APP_API_BASE_URL=https://api.rcl0511.xyz
   const BASE_URL =
     process.env.REACT_APP_API_BASE_URL || "https://api.rcl0511.xyz";
 
@@ -36,7 +34,7 @@ export default function VoicePage() {
     }, 250);
   };
 
-  // ✅ 토큰을 localStorage에서 가져오기 (프로젝트마다 키명이 달라서 최대한 커버)
+  // 토큰 있으면 넣고, 없으면 빈 객체
   const getAuthHeaders = () => {
     const token =
       localStorage.getItem("token") ||
@@ -53,7 +51,6 @@ export default function VoicePage() {
       return;
     }
 
-    // 초기화
     setResult("");
     setResponse("");
     setAudioUrl("");
@@ -88,43 +85,34 @@ export default function VoicePage() {
     setShowInputBox(false);
   };
 
-  // ✅ /dialog로 질문 보내고, 응답(answer) 받은 뒤
-  // - 백엔드가 audio_url 주면 바로 재생
-  // - 없으면 /tts 호출해서 mp3 생성
   const sendTextToServer = async (keyword) => {
     try {
       setResponse("AI 응답을 기다리는 중...");
       setAudioUrl("");
 
-      const headers = {
-        "Content-Type": "application/json",
-        ...getAuthHeaders(),
-      };
-
-      // 1) ✅ LLM 응답: /dialog
+      // 1) /dialog 호출
       const res = await fetch(`${BASE_URL}/dialog`, {
         method: "POST",
-        headers,
+        headers: {
+          "Content-Type": "application/json",
+          ...getAuthHeaders(), // 토큰 있으면만
+        },
         body: JSON.stringify({ keyword }),
       });
 
       if (!res.ok) {
         const text = await res.text();
-        // 인증이 필요한데 토큰이 없으면 401
         if (res.status === 401) {
-          throw new Error(
-            "로그인이 필요합니다. (401) 로그인 후 다시 시도해 주세요."
-          );
+          throw new Error("로그인이 필요합니다. 로그인 후 다시 시도해 주세요.");
         }
         throw new Error(`HTTP ${res.status} - ${text}`);
       }
 
       const data = await res.json();
-
       const answer = data?.answer || data?.text || "";
       setResponse(answer);
 
-      // 2) ✅ audio_url 있으면 바로 재생
+      // 2) audio_url이 백엔드에서 오면 바로 재생
       if (data?.audio_url) {
         const mp3url = data.audio_url.startsWith("http")
           ? data.audio_url
@@ -133,11 +121,11 @@ export default function VoicePage() {
         return;
       }
 
-      // 3) ✅ audio_url 없으면 /tts로 생성
+      // 3) audio_url이 없으면 /tts로 생성해서 재생 (여긴 Authorization 필요 없음)
       if (answer && answer.trim().length > 0) {
         const ttsRes = await fetch(`${BASE_URL}/tts`, {
           method: "POST",
-          headers,
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ text: answer, lang: "ko" }),
         });
 
@@ -235,7 +223,7 @@ export default function VoicePage() {
           </>
         )}
 
-        {audioUrl && audioUrl !== "" && (
+        {audioUrl && (
           <audio
             ref={audioRef}
             src={audioUrl}
@@ -245,12 +233,6 @@ export default function VoicePage() {
           >
             브라우저가 오디오 태그를 지원하지 않습니다.
           </audio>
-        )}
-
-        {audioUrl && (
-          <div style={{ color: "blue", fontSize: 14, marginTop: 8 }}>
-            audioUrl: {audioUrl}
-          </div>
         )}
       </div>
 

@@ -10,14 +10,15 @@ router = APIRouter(prefix="/medical", tags=["medical"])
 def now_utc():
     return datetime.now(timezone.utc)
 
-@router.on_event("startup")
-async def ensure_indexes():
+# ✅ 인덱스는 main.py startup에서 ensure_medical_indexes() 호출 권장
+async def ensure_medical_indexes():
     await medical_col.create_index("user_id", unique=True)
 
 @router.get("", response_model=MedicalProfileOut)
 async def get_my_medical(user_id: str = Depends(get_current_user_id)):
     doc = await medical_col.find_one({"user_id": user_id})
     if not doc:
+        # 가입은 했지만 의료정보를 아직 입력 안 한 상태
         return {
             "user_id": user_id,
             "name": "",
@@ -31,11 +32,15 @@ async def get_my_medical(user_id: str = Depends(get_current_user_id)):
             "created_at": now_utc(),
             "updated_at": now_utc(),
         }
+
     doc.pop("_id", None)
     return doc
 
 @router.put("", response_model=MedicalProfileOut)
-async def upsert_my_medical(payload: MedicalProfileIn, user_id: str = Depends(get_current_user_id)):
+async def upsert_my_medical(
+    payload: MedicalProfileIn,
+    user_id: str = Depends(get_current_user_id),
+):
     existing = await medical_col.find_one({"user_id": user_id})
     created_at = existing.get("created_at", now_utc()) if existing else now_utc()
 
@@ -49,6 +54,7 @@ async def upsert_my_medical(payload: MedicalProfileIn, user_id: str = Depends(ge
     await medical_col.update_one(
         {"user_id": user_id},
         {"$set": update_doc},
-        upsert=True
+        upsert=True,
     )
+
     return update_doc

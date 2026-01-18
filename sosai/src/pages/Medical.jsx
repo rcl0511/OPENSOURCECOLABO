@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import NavBar from "../components/NavBar";
 import "./MedicalPage.css";
 
@@ -16,38 +16,124 @@ const emptyForm = {
 };
 
 export default function Medical() {
-  const [form, setForm] = useState(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (!saved) return emptyForm;
+  const BASE_URL =
+    process.env.REACT_APP_API_BASE_URL || "https://api.rcl0511.xyz";
 
-      const parsed = JSON.parse(saved);
-      // 혹시 예전 키가 섞여 있어도 안전하게 병합
-      return { ...emptyForm, ...parsed };
-    } catch {
-      return emptyForm;
-    }
-  });
-
+  const [form, setForm] = useState(emptyForm);
   const [editing, setEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // 입력값 변경
+  // ✅ 토큰 헤더 (useCallback으로 고정)
+  const getAuthHeaders = useCallback(() => {
+    const token =
+      localStorage.getItem("token") ||
+      localStorage.getItem("access_token") ||
+      localStorage.getItem("jwt") ||
+      "";
+
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  }, []);
+
+  // ✅ 페이지 진입 시 DB에서 내 의료정보 불러오기
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const headers = { ...getAuthHeaders() };
+
+        // 로그인 안 했으면 로컬 캐시라도 보여주기
+        if (!headers.Authorization) {
+          try {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) setForm({ ...emptyForm, ...JSON.parse(saved) });
+          } catch {}
+          return;
+        }
+
+        const res = await fetch(`${BASE_URL}/medical`, { headers });
+
+        if (!res.ok) {
+          const text = await res.text();
+          if (res.status === 401) {
+            alert("로그인이 필요합니다. 다시 로그인해 주세요.");
+          } else {
+            console.error("GET /medical failed:", text);
+          }
+          return;
+        }
+
+        const data = await res.json();
+
+        const merged = { ...emptyForm, ...data };
+        delete merged.user_id;
+        delete merged.created_at;
+        delete merged.updated_at;
+
+        setForm(merged);
+
+        // 로컬 캐시 저장
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    load();
+  }, [BASE_URL, getAuthHeaders]);
+
   const onChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // 저장
-  const onSave = () => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(form));
-    setEditing(false);
-    alert("내 정보가 저장되었습니다!");
+  // ✅ 저장: PUT /medical (DB에 upsert)
+  const onSave = async () => {
+    try {
+      const headers = {
+        "Content-Type": "application/json",
+        ...getAuthHeaders(),
+      };
+
+      if (!headers.Authorization) {
+        alert("로그인이 필요합니다. 로그인 후 다시 저장해 주세요.");
+        return;
+      }
+
+      const res = await fetch(`${BASE_URL}/medical`, {
+        method: "PUT",
+        headers,
+        body: JSON.stringify(form),
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        if (res.status === 401) {
+          alert("로그인이 만료되었습니다. 다시 로그인해 주세요.");
+          return;
+        }
+        throw new Error(text || `저장 실패 (HTTP ${res.status})`);
+      }
+
+      const saved = await res.json();
+
+      const merged = { ...emptyForm, ...saved };
+      delete merged.user_id;
+      delete merged.created_at;
+      delete merged.updated_at;
+
+      setForm(merged);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+
+      setEditing(false);
+      alert("내 의료 정보가 저장되었습니다! (MongoDB 반영 완료)");
+    } catch (e) {
+      alert("저장 중 오류: " + (e.message || e));
+    }
   };
 
-  // 수정 모드 진입
   const startEdit = () => setEditing(true);
 
-  // (선택) 편집 취소 시 로컬 저장값으로 되돌리기
   const cancelEdit = () => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -58,7 +144,23 @@ export default function Medical() {
     setEditing(false);
   };
 
-  const Null = ({ text = "미입력" }) => <span className="medical-null">{text}</span>;
+  const Null = ({ text = "미입력" }) => (
+    <span className="medical-null">{text}</span>
+  );
+
+  if (loading) {
+    return (
+      <div className="medical-bg">
+        <div className="medical-content">
+          <h2 className="medical-title">내 의료 정보</h2>
+          <div className="medical-card" style={{ padding: 20 }}>
+            불러오는 중...
+          </div>
+        </div>
+        <NavBar active="medical" />
+      </div>
+    );
+  }
 
   return (
     <div className="medical-bg">
@@ -167,7 +269,7 @@ export default function Medical() {
               </label>
 
               <button className="medical-btn" type="submit">
-                저장
+                저장 (DB 반영)
               </button>
 
               <button
@@ -192,21 +294,35 @@ export default function Medical() {
               </div>
               <div>
                 <b>병력(기저질환 포함):</b>{" "}
-                {form.medical_history ? form.medical_history : <Null text="없음" />}
+                {form.medical_history ? (
+                  form.medical_history
+                ) : (
+                  <Null text="없음" />
+                )}
               </div>
               <div>
                 <b>수술 이력:</b>{" "}
-                {form.surgery_history ? form.surgery_history : <Null text="없음" />}
+                {form.surgery_history ? (
+                  form.surgery_history
+                ) : (
+                  <Null text="없음" />
+                )}
               </div>
               <div>
-                <b>복용약:</b> {form.medications ? form.medications : <Null text="없음" />}
+                <b>복용약:</b>{" "}
+                {form.medications ? form.medications : <Null text="없음" />}
               </div>
               <div>
-                <b>알레르기:</b> {form.allergies ? form.allergies : <Null text="없음" />}
+                <b>알레르기:</b>{" "}
+                {form.allergies ? form.allergies : <Null text="없음" />}
               </div>
               <div>
                 <b>응급연락망:</b>{" "}
-                {form.emergency_contacts ? form.emergency_contacts : <Null text="없음" />}
+                {form.emergency_contacts ? (
+                  form.emergency_contacts
+                ) : (
+                  <Null text="없음" />
+                )}
               </div>
 
               <button
