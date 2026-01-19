@@ -23,7 +23,6 @@ export default function Medical() {
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // ✅ 토큰 헤더 (useCallback으로 고정)
   const getAuthHeaders = useCallback(() => {
     const token =
       localStorage.getItem("token") ||
@@ -34,13 +33,11 @@ export default function Medical() {
     return token ? { Authorization: `Bearer ${token}` } : {};
   }, []);
 
-  // ✅ 페이지 진입 시 DB에서 내 의료정보 불러오기
   useEffect(() => {
     const load = async () => {
       try {
         const headers = { ...getAuthHeaders() };
 
-        // 로그인 안 했으면 로컬 캐시라도 보여주기
         if (!headers.Authorization) {
           try {
             const saved = localStorage.getItem(STORAGE_KEY);
@@ -69,8 +66,6 @@ export default function Medical() {
         delete merged.updated_at;
 
         setForm(merged);
-
-        // 로컬 캐시 저장
         localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
       } catch (e) {
         console.error(e);
@@ -87,7 +82,6 @@ export default function Medical() {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // ✅ 저장: PUT /medical (DB에 upsert)
   const onSave = async () => {
     try {
       const headers = {
@@ -148,6 +142,13 @@ export default function Medical() {
     <span className="medical-null">{text}</span>
   );
 
+  const InfoRow = ({ label, value }) => (
+    <div className="info-row">
+      <div className="info-label">{label}</div>
+      <div className="info-value">{value}</div>
+    </div>
+  );
+
   if (loading) {
     return (
       <div className="medical-bg">
@@ -198,6 +199,7 @@ export default function Medical() {
                   placeholder="YYYY-MM-DD"
                   maxLength={10}
                   autoComplete="off"
+                  inputMode="numeric"
                 />
               </label>
 
@@ -265,65 +267,55 @@ export default function Medical() {
                   onChange={onChange}
                   placeholder="예: 엄마 010-xxxx-xxxx"
                   autoComplete="off"
+                  inputMode="tel"
                 />
               </label>
 
-              <button className="medical-btn" type="submit">
-                저장 (DB 반영)
-              </button>
+              <div className="medical-actions">
+                <button className="medical-btn" type="submit">
+                  저장 (DB 반영)
+                </button>
 
-              <button
-                className="medical-btn outline"
-                type="button"
-                onClick={cancelEdit}
-                style={{ marginLeft: 10 }}
-              >
-                취소
-              </button>
+                <button
+                  className="medical-btn outline"
+                  type="button"
+                  onClick={cancelEdit}
+                >
+                  취소
+                </button>
+              </div>
             </form>
           ) : (
             <div className="medical-info">
-              <div>
-                <b>이름:</b> {form.name ? form.name : <Null />}
-              </div>
-              <div>
-                <b>생년월일:</b> {form.birth_date ? form.birth_date : <Null />}
-              </div>
-              <div>
-                <b>혈액형:</b> {form.blood_type ? form.blood_type : <Null />}
-              </div>
-              <div>
-                <b>병력(기저질환 포함):</b>{" "}
-                {form.medical_history ? (
-                  form.medical_history
-                ) : (
-                  <Null text="미입력" />
-                )}
-              </div>
-              <div>
-                <b>수술 이력:</b>{" "}
-                {form.surgery_history ? (
-                  form.surgery_history
-                ) : (
-                  <Null text="미입력" />
-                )}
-              </div>
-              <div>
-                <b>복용약:</b>{" "}
-                {form.medications ? form.medications : <Null text="미입력" />}
-              </div>
-              <div>
-                <b>알레르기:</b>{" "}
-                {form.allergies ? form.allergies : <Null text="미입력" />}
-              </div>
-              <div>
-                <b>응급연락망:</b>{" "}
-                {form.emergency_contacts ? (
-                  form.emergency_contacts
-                ) : (
-                  <Null text="미입력" />
-                )}
-              </div>
+              <InfoRow label="이름" value={form.name ? form.name : <Null />} />
+              <InfoRow
+                label="생년월일"
+                value={form.birth_date ? form.birth_date : <Null />}
+              />
+              <InfoRow
+                label="혈액형"
+                value={form.blood_type ? form.blood_type : <Null />}
+              />
+              <InfoRow
+                label="병력(기저질환 포함)"
+                value={form.medical_history ? form.medical_history : <Null />}
+              />
+              <InfoRow
+                label="수술 이력"
+                value={form.surgery_history ? form.surgery_history : <Null />}
+              />
+              <InfoRow
+                label="복용약"
+                value={form.medications ? form.medications : <Null />}
+              />
+              <InfoRow
+                label="알레르기"
+                value={form.allergies ? form.allergies : <Null />}
+              />
+              <InfoRow
+                label="응급연락망"
+                value={form.emergency_contacts ? form.emergency_contacts : <Null />}
+              />
 
               <button
                 className="medical-btn outline"
