@@ -24,7 +24,7 @@
   flex-direction: column;
   align-items: center;
 
-  padding: calc(44px + env(safe-area-inset-top)) 18px 120px;
+  padding: 56px 18px 110px;
   font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
   color: var(--text);
 
@@ -55,8 +55,8 @@
 /* ===== Header ===== */
 .voice-header{
   text-align: center;
-  margin: 6px 0 16px;
-  font-size: clamp(22px, 3.2vw, 34px);
+  margin: 8px 0 18px;
+  font-size: clamp(22px, 3vw, 34px);
   font-weight: 850;
   letter-spacing: -0.6px;
   color: var(--text);
@@ -65,9 +65,9 @@
 .voice-header::after{
   content:"";
   display:block;
-  width: 64px;
-  height: 3px;
-  margin: 8px auto 0;
+  width: 72px;
+  height: 4px;
+  margin: 10px auto 0;
   border-radius: 999px;
   background: linear-gradient(90deg, var(--primary), var(--brand));
   opacity: 0.9;
@@ -84,18 +84,14 @@
 
 /* ✅ 카드처럼 보이지 않게(배경/그림자 제거), 은은한 링만 */
 .voice-mic-icon{
-  width: 82px;
-  height: 82px;
-  padding: 16px;
+  width: 76px;
+  height: 76px;
+  padding: 14px;
   border-radius: 999px;
 
-  background:
-    radial-gradient(60px 60px at 50% 40%, rgba(44,110,255,0.10), transparent 70%),
-    #ffffff;
-  border: 1px solid rgba(44,110,255,0.18);
-  box-shadow:
-    0 10px 24px rgba(44,110,255,0.10),
-    inset 0 0 0 1px rgba(255,255,255,0.65);
+  background: transparent;
+  border: 1px solid var(--stroke);
+  box-shadow: none;
 
   transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
 }
@@ -110,8 +106,7 @@
   border-color: rgba(44,110,255,0.55);
   box-shadow:
     0 0 0 6px rgba(44,110,255,0.10),
-    0 0 0 12px rgba(44,110,255,0.06),
-    0 10px 24px rgba(44,110,255,0.14);
+    0 0 0 12px rgba(44,110,255,0.06);
   animation: micPulse 1.25s ease-in-out infinite;
 }
 
@@ -126,16 +121,16 @@
   text-align: center;
   margin: 8px 0 16px;
 
-  padding: 12px 16px;
-  background: rgba(255,255,255,0.7);
-  border: 1px solid rgba(15,23,42,0.08);
-  box-shadow: 0 10px 26px rgba(48,80,120,0.08);
-  backdrop-filter: blur(8px);
-  border-radius: 16px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  backdrop-filter: none;
 
-  font-size: 15px;
-  line-height: 1.6;
+  font-size: 16px;
+  line-height: 1.55;
   color: var(--muted);
+  word-break: keep-all;
 }
 
 .voice-guide b{
@@ -149,7 +144,7 @@
   justify-content: center;
   flex-wrap: wrap;
   gap: 12px;
-  margin: 8px 0 18px;
+  margin: 10px 0 18px;
 }
 
 .voice-btn{
@@ -267,11 +262,10 @@
   margin-top: 14px;
   text-align: center;
 
-  padding: 10px 12px;
-  background: rgba(255,255,255,0.7);
-  border: 1px solid rgba(15,23,42,0.08);
-  box-shadow: 0 6px 18px rgba(48,80,120,0.06);
-  border-radius: 12px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
 
   color: var(--muted);
   font-size: 15px;
@@ -285,12 +279,11 @@
 .voice-response{
   margin-top: 14px;
 
-  padding: 12px 14px;
-  background: rgba(255,255,255,0.75);
-  border: 1px solid rgba(15,23,42,0.08);
-  box-shadow: 0 10px 26px rgba(48,80,120,0.08);
-  backdrop-filter: blur(8px);
-  border-radius: 16px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  backdrop-filter: none;
 
   font-size: 15px;
   line-height: 1.7;
@@ -321,7 +314,7 @@ audio{
 /* ===== Responsive ===== */
 @media (max-width: 520px){
   .voice-bg{
-    padding: calc(36px + env(safe-area-inset-top)) 14px 120px;
+    padding: 44px 14px 110px;
   }
 
   .voice-btn{
@@ -332,6 +325,10 @@ audio{
   .text-input-row{
     flex-direction: row;   /* ✅ 아이콘 버튼이니까 한 줄 유지가 예쁨 */
     align-items: center;
+  }
+
+  .voice-guide{
+    font-size: 15px;
   }
 }
 
