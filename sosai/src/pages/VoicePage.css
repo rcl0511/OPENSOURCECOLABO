@@ -24,7 +24,7 @@
   flex-direction: column;
   align-items: center;
 
-  padding: 56px 18px 110px;
+  padding: 56px 18px calc(140px + env(safe-area-inset-bottom));
   font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
   color: var(--text);
 
@@ -162,9 +162,9 @@
 .voice-btn:active{ transform: translateY(1px); }
 
 .voice-btn.main{
-  background: linear-gradient(135deg, rgba(44,110,255,1), rgba(48,80,120,1));
+  background: #2C6EFF;
   color: #fff;
-  box-shadow: 0 10px 26px rgba(44,110,255,0.18);
+  box-shadow: 0 10px 26px rgba(44,110,255,0.2);
 }
 
 .voice-btn.main:hover{
@@ -314,7 +314,7 @@ audio{
 /* ===== Responsive ===== */
 @media (max-width: 520px){
   .voice-bg{
-    padding: 44px 14px 110px;
+    padding: 44px 14px calc(140px + env(safe-area-inset-bottom));
   }
 
   .voice-btn{
