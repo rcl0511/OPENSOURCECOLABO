@@ -1,3 +1,4 @@
+// VoicePage.jsx
 import React, { useState, useRef } from "react";
 import NavBar from "../components/NavBar";
 import "./VoicePage.css";
@@ -5,8 +6,6 @@ import { Mic } from "lucide-react";
 
 /**
  * SOSAI VoicePage (LLM 기반 /dialog 전용)
- * - 이미지/화상 기능 제거
- * - /answer(SBERT) 제거
  * - /dialog 호출 (JWT 있으면 Authorization 헤더 포함)
  * - audio_url 있으면 재생, 없으면 /tts로 생성
  */
@@ -95,7 +94,7 @@ export default function VoicePage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...getAuthHeaders(), // 토큰 있으면만
+          ...getAuthHeaders(),
         },
         body: JSON.stringify({ keyword }),
       });
@@ -121,7 +120,7 @@ export default function VoicePage() {
         return;
       }
 
-      // 3) audio_url이 없으면 /tts로 생성해서 재생 (여긴 Authorization 필요 없음)
+      // 3) audio_url이 없으면 /tts로 생성해서 재생
       if (answer && answer.trim().length > 0) {
         const ttsRes = await fetch(`${BASE_URL}/tts`, {
           method: "POST",
@@ -152,15 +151,10 @@ export default function VoicePage() {
     <div className="voice-bg">
       <div className="voice-header">Let us SOSAI</div>
 
-      <div
-        className="voice-mic"
-        onClick={handleStart}
-        style={{ cursor: "pointer" }}
-      >
+      <div className="voice-mic" onClick={handleStart}>
         <Mic
-          size={90}
           strokeWidth={2.2}
-          color={listening ? "#888" : "#305078"}
+          className={`voice-mic-icon ${listening ? "is-listening" : ""}`}
         />
       </div>
 
@@ -178,7 +172,6 @@ export default function VoicePage() {
           className="voice-btn main"
           onClick={handleStart}
           disabled={listening}
-          style={{ background: listening ? "#ddd" : "#305078", color: "#fff" }}
         >
           {listening ? "듣는 중..." : "음성인식"}
         </button>
